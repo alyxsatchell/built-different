@@ -22,12 +22,13 @@ const runWasm = async () => {
             }
           
             switch (event.key) {
+
               case "ArrowDown":
                 // code for "down arrow" key press.
-                space.accelerate(0, 0, -1);
+                space.accelerate(0, 0, 1);
                 break;
               case "ArrowUp":
-                space.accelerate(0, 0, 1);
+                space.accelerate(0, 0, -1);
                 // code for "up arrow" key press.
                 break;
               case "ArrowLeft":
@@ -39,7 +40,21 @@ const runWasm = async () => {
                 console.log("Right")
                 // code for "right arrow" key press.
                 break;
+              case "w":
+                space.accelerate(1,0,-1);
+                break;
+              case "a":
+                space.accelerate(1,1,0)
+                break;
+              case "s":
+                space.accelerate(1,0,1);
+                break;
+              case "d":
+                space.accelerate(1,-1,0);
+                console.log("d")
+                break;
               default:
+                // console.log(event.key)
                 return; // Quit when this doesn't handle the key event.
             }
           
@@ -57,6 +72,6 @@ const runWasm = async () => {
   	};
   	setInterval(() =>{
     	tick();
-  	}, 1000)
+  	}, 50)
 };
 runWasm();

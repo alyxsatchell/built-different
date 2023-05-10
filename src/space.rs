@@ -75,7 +75,8 @@ impl CellGrid{
         if p.x < 0 || p.x >= self.grid[p.y as usize].len() as i32{
             return None
         }
-        Some(&mut self.grid[p.y as usize][p.x as usize])
+        // Some(&mut self.grid[p.y as usize][p.x as usize])
+        Some(&mut self.grid[p.x as usize][p.y as usize])
     }
 
     pub fn insert_player(&mut self, player: &mut Player){
@@ -113,8 +114,9 @@ impl Space{
         let canvas: Vec<u8> = vec![0;width as usize * height as usize *4];
         let mut grid = CellGrid::new(width, height);
         let player = Player::new();
+        let player2 = Player::new();
         *grid.get_mut(&player.vector.origin).unwrap() = Cell{color: player.color, occupied: true};
-        let players = vec![player];
+        let players = vec![player, player2];
 
         Space {size: Point{x:width, y:height}, grid, players, canvas}
     }
@@ -141,9 +143,7 @@ impl Space{
     }
 
     fn turn(&mut self){
-        // web_sys::console::log_1(&"---------".into());
         for player in &mut self.players{
-            // web_sys::console::log_1(&"-----------".into());
             player.vector.translate(&self.size);
             self.grid.insert_player(player);
         }
@@ -155,12 +155,8 @@ impl Space{
     }
 
     pub fn accelerate(&mut self, id: i32, x: i32, y: i32){
-        web_sys::console::log_1(&self.players.len().into());
-        // &self.players[0];
         if (id as usize) < self.players.len(){
             self.players[id as usize].accelerate(x, y);
         }
-        self.players[0].accelerate(x, y);
-        web_sys::console::log_1(&self.players[0].vector.x.into());
     }
 }
