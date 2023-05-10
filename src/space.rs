@@ -1,7 +1,10 @@
 use std::thread::JoinHandle;
+use std::sync::mpsc::{channel, Sender, Receiver};
+use std::thread;
+use std::time::Duration;
 
 use crate::vector::{Point, Vector};
-use crate::player::Player;
+use crate::player::{Player, Direction};
 
 const space_cell: Cell = Cell{color: Color { r: 0, b: 0, g: 0, a: 0 }, occupied: false};
 
@@ -96,7 +99,8 @@ pub struct Space{
     players: Vec<Player>,
     canvas: Vec<u8>,
     input_worker_handle: JoinHandle<String>,
-    input
+    rx_main: Receiver<Direction>,
+    tx_main: Sender<String>
 }
 
 impl Space{
@@ -106,7 +110,18 @@ impl Space{
         let player = Player::new();
         *grid.get_mut(&player.vector.origin).unwrap() = Cell{color: player.color, occupied: true};
         let players = vec![player];
-        Space {size: Point{x:width, y:height}, grid, players, canvas}
+        let (tx_main, rx_worker) = channel();
+        let (tx_worker, rx_main) = channel();
+        let input_worker_handle = thread::spawn(move || {
+            loop{
+                let input = get_input();
+                match rx_worker.try_recv(){
+                    Ok(v) => {tx_worker.send(input);},
+                    Err(e) => ()
+                }
+            }
+        });
+        Space {size: Point{x:width, y:height}, grid, players, canvas, input_worker_handle, rx_main, tx_main}
     }
 
     pub fn push_canvas(&mut self){
@@ -129,4 +144,30 @@ impl Space{
     pub fn get_canvas(&self) -> *const u8{
         return self.canvas.as_ptr()
     }
+
+    fn turn(&mut self){
+        for player in &mut self.players{
+            player.vector.translate(&self.size);
+            self.grid.insert_player(player);
+        }
+    }
+
+    fn get_input(&mut self){
+        self.tx_main.send(String::from("input"));
+        match self.rx_main.recv_timeout(Duration::from_millis(10)){
+            Ok(dir) => self.players[0].accelerate(dir),
+            Err(e) => {println!("{}", e);}
+        }
+    }
+
+    pub fn tick(&mut self){
+        self.get_input();
+        self.turn();
+        self.push_canvas();
+    }
+}
+
+//placeholder
+fn get_input() -> Direction{
+    return Direction::Right
 }

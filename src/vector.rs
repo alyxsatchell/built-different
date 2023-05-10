@@ -68,7 +68,7 @@ impl Vector{
         return Vector{origin: Point{x:0, y:0}, x: 0, y: 0, modifier: 0, magnitude: 0.0}
     }
 
-    pub fn translate(&mut self, map_size: Point){
+    pub fn translate(&mut self, map_size: &Point){
         let (new_x, new_y): (i32,i32) = (self.origin[0] + (self.modifier * self.x), self.origin[1] + (self.modifier * self.y));
         if new_x >= map_size[0] || new_x < 0{
             self.x *= -1;
