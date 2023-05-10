@@ -65,10 +65,11 @@ impl Vector{
     }
 
     pub fn zero() -> Vector{
-        return Vector{origin: Point{x:0, y:0}, x: 0, y: 0, modifier: 0, magnitude: 0.0}
+        return Vector{origin: Point{x:30, y:30}, x: 1, y: 1, modifier: 1, magnitude: 1.414}
     }
 
     pub fn translate(&mut self, map_size: &Point){
+
         let (new_x, new_y): (i32,i32) = (self.origin[0] + (self.modifier * self.x), self.origin[1] + (self.modifier * self.y));
         if new_x >= map_size[0] || new_x < 0{
             self.x *= -1;
@@ -76,6 +77,9 @@ impl Vector{
         if new_y >= map_size[1] || new_y < 0{
             self.y *= -1;
         }
+        // web_sys::console::log_1(&self.x.into());
+        web_sys::console::log_1(&self.origin.x.into());
+        web_sys::console::log_1(&self.origin.y.into());
         self.origin = Point{x: new_x, y: new_y};
     }
 

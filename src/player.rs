@@ -1,3 +1,5 @@
+use wasm_bindgen::prelude::wasm_bindgen;
+
 use crate::{vector::Vector, vector::Point, space::Color};
 
 pub enum Direction{
@@ -15,6 +17,7 @@ pub struct Player{
     pub occupied_space: Vec<Point>
 }
 
+
 impl Player {
     pub fn new() -> Player{
         let size = 2;
@@ -24,10 +27,15 @@ impl Player {
         return Player {size, vector, speed, color, occupied_space: Vec::new()}
     }
 
-    pub fn accelerate(&mut self, direction: Direction){
-        let direction_vector = Vector::direction_vector(self.speed, direction);
-        self.vector += direction_vector;
+    // pub fn accelerate(&mut self, direction: Direction){
+    //     let direction_vector = Vector::direction_vector(self.speed, direction);
+    //     self.vector += direction_vector;
+    // }
+    pub fn accelerate(&mut self, x: i32, y: i32){
+        let acceleration_vector = Vector{origin: Point{x:0,y:0}, x: self.speed * x, y: self.speed * y, modifier: 1, magnitude: 0.0};
+        self.vector += acceleration_vector;
     }
+
 
     pub fn make_circle(&self) -> Vec<Point>{
         let mut circle_vec = Vec::new();
