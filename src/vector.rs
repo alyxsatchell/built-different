@@ -65,7 +65,7 @@ impl Vector{
     }
 
     pub fn zero() -> Vector{
-        return Vector{origin: Point{x:30, y:30}, x: 1, y: 1, modifier: 1, magnitude: 1.414}
+        return Vector{origin: Point{x:0, y:0}, x: 0, y: 0, modifier: 1, magnitude: 0.0}
     }
 
     pub fn translate(&mut self, map_size: &Point){
@@ -78,8 +78,8 @@ impl Vector{
             self.y *= -1;
         }
         // web_sys::console::log_1(&self.x.into());
-        web_sys::console::log_1(&self.origin.x.into());
-        web_sys::console::log_1(&self.origin.y.into());
+        // web_sys::console::log_1(&self.x.into());
+        // web_sys::console::log_1(&self.y.into());
         self.origin = Point{x: new_x, y: new_y};
     }
 

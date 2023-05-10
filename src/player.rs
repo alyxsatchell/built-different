@@ -22,7 +22,7 @@ impl Player {
     pub fn new() -> Player{
         let size = 2;
         let vector = Vector::zero();
-        let speed = 0;
+        let speed = 1;
         let color = Color::new(255,255,255,255);
         return Player {size, vector, speed, color, occupied_space: Vec::new()}
     }
@@ -40,15 +40,25 @@ impl Player {
     pub fn make_circle(&self) -> Vec<Point>{
         let mut circle_vec = Vec::new();
         let origin = self.vector.origin.clone();
-        for x in 1..=self.size{
-            for y in 1..=self.size{
+        for x in 0..=self.size{
+            for y in 0..=self.size{
+                if calc_circle(x, y) <= self.size{
+                    circle_vec.push(Point{x: origin.x + x, y: origin.y + y});
+                    circle_vec.push(Point{x: origin.x - x, y: origin.y + y});
+                    circle_vec.push(Point{x: origin.x + x, y: origin.y - y});
+                    circle_vec.push(Point{x: origin.x - x, y: origin.y - y});
+                }
                 //adds a point in all 4 quads (circle is symmetrical in all directions)
-                circle_vec.push(Point{x: origin.x + x, y: origin.y + y});
-                circle_vec.push(Point{x: origin.x - x, y: origin.y + y});
-                circle_vec.push(Point{x: origin.x + x, y: origin.y - y});
-                circle_vec.push(Point{x: origin.x - x, y: origin.y - y});
+                // circle_vec.push(Point{x: origin.x + x, y: origin.y + y});
+                // circle_vec.push(Point{x: origin.x - x, y: origin.y + y});
+                // circle_vec.push(Point{x: origin.x + x, y: origin.y - y});
+                // circle_vec.push(Point{x: origin.x - x, y: origin.y - y});
             }
         }
         return circle_vec
     }
+}
+
+pub fn calc_circle(x: i32, y: i32) -> i32{
+    return (x.pow(2) as f64 + y.pow(2) as f64).sqrt().round() as i32
 }

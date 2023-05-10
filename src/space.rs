@@ -155,8 +155,12 @@ impl Space{
     }
 
     pub fn accelerate(&mut self, id: i32, x: i32, y: i32){
+        web_sys::console::log_1(&self.players.len().into());
+        // &self.players[0];
         if (id as usize) < self.players.len(){
             self.players[id as usize].accelerate(x, y);
         }
+        self.players[0].accelerate(x, y);
+        web_sys::console::log_1(&self.players[0].vector.x.into());
     }
 }
