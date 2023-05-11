@@ -7,7 +7,7 @@ use crate::vector::{Vector, Point};
 pub struct Velocity{
     pub origin: Point,
     pub vector: Vector
-}
+} 
 
 impl Velocity{
     pub fn new(origin: Point, x: f64, y: f64) -> Velocity{

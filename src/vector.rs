@@ -39,6 +39,32 @@ impl IndexMut<usize> for Point {
     }
 }
 
+impl Add<Point> for Point {
+    type Output = Point;
+    fn add(self, other: Point) -> Point {
+        let x = self.x + other.x;
+        let y = self.y + other.y;
+        Point {x, y}
+    }
+}
+
+impl Sub<Point> for Point{
+    type Output = Point;
+    fn sub(self, other: Point) -> Point {
+        let x = self.x - other.x;
+        let y = self.y - other.y;
+        let magnitude = ((f64::powf(x,2.0) + f64::powf(y,2.0)) as f64).sqrt();
+        return Point{x,y}
+    } 
+}
+
+impl AddAssign<Point> for Point{
+    fn add_assign(&mut self, other: Point) {
+        self.x += other.x;
+        self.y += other.y;
+    }
+}
+
 pub struct Vector{
     pub x: f64,
     pub y: f64,

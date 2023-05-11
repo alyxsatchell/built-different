@@ -8,6 +8,7 @@ use web_sys;
 
 use crate::vector::{Point, Vector};
 use crate::player::{Player, Direction};
+use crate::object::Object;
 
 const space_cell: Cell = Cell{color: Color { r: 0, b: 0, g: 0, a: 255 }, occupied: false};
 
@@ -80,17 +81,17 @@ impl CellGrid{
     }
 
     pub fn insert_player(&mut self, player: &mut Player){
-        for i in &player.occupied_space{
+        for (i,_) in &player.occupied_space{
             let cell = self.get_mut(i);
             if cell.is_some(){
                 *cell.unwrap() = space_cell.clone();
             }
         }
         let occupied_space = player.make_circle();
-        for i in &occupied_space{
+        for (i, color) in &occupied_space{
             let cell = self.get_mut(i);
             if cell.is_some(){
-                *cell.unwrap() = Cell{color: player.color.clone(), occupied: true};
+                *cell.unwrap() = Cell{color: color.clone(), occupied: true};
             }
         }
         player.occupied_space = occupied_space;

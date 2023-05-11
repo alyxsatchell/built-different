@@ -3,6 +3,8 @@ pub mod vector;
 pub mod space;
 pub mod player;
 pub mod velocity;
+pub mod material;
+pub mod object;
 
 // use crate::space::Space;
 
