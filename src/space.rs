@@ -47,11 +47,11 @@ pub struct CellGrid{
 }
 
 impl CellGrid{
-    pub fn new(width: i32, height: i32) -> CellGrid{
+    pub fn new(width: f64, height: f64) -> CellGrid{
         let mut grid = Vec::new();
-        for h in 0..height{
+        for h in 0..height as i32{
             grid.push(Vec::new());
-            for w in 0..width{
+            for w in 0..width as i32{
                 grid[h as usize].push(space_cell.clone());
             }
         }
@@ -59,20 +59,20 @@ impl CellGrid{
     }
 
     pub fn get(&self, p: Point) -> Option<&Cell>{
-        if p.y < 0 || p.y >= self.grid.len() as i32{
+        if p.y < 0.0 || p.y >= self.grid.len() as f64{
             return None
         }
-        if p.x < 0 || p.x >= self.grid[p.y as usize].len() as i32{
+        if p.x < 0.0 || p.x >= self.grid[p.y as usize].len() as f64{
             return None
         }
         Some(&self.grid[p.y as usize][p.x as usize])
     }
 
     pub fn get_mut(&mut self, p: &Point) -> Option<&mut Cell>{
-        if p.y < 0 || p.y >= self.grid.len() as i32{
+        if p.y < 0.0 || p.y >= self.grid.len() as f64{
             return None
         }
-        if p.x < 0 || p.x >= self.grid[p.y as usize].len() as i32{
+        if p.x < 0.0 || p.x >= self.grid[p.y as usize].len() as f64{
             return None
         }
         // Some(&mut self.grid[p.y as usize][p.x as usize])
@@ -110,7 +110,7 @@ pub struct Space{
 #[wasm_bindgen]
 impl Space{
     pub fn new() -> Space{
-        let (width, height): (i32, i32) = (100, 100);
+        let (width, height): (f64, f64) = (100.0, 100.0);
         let canvas: Vec<u8> = vec![0;width as usize * height as usize *4];
         let mut grid = CellGrid::new(width, height);
         let player = Player::new();
@@ -154,7 +154,7 @@ impl Space{
         self.push_canvas();
     }
 
-    pub fn accelerate(&mut self, id: i32, x: i32, y: i32){
+    pub fn accelerate(&mut self, id: i32, x: f64, y: f64){
         if (id as usize) < self.players.len(){
             self.players[id as usize].accelerate(x, y);
         }

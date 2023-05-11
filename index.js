@@ -12,9 +12,7 @@ const runWasm = async () => {
 		canvasElement.height
 	);
   	canvasContext.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    console.log("bean")
   	let space = Space.new();
-    console.log("bean2")
   	const tick = () => {
         window.addEventListener("keydown", function (event) {
             if (event.defaultPrevented) {
@@ -44,20 +42,17 @@ const runWasm = async () => {
                 space.accelerate(1,0,-1);
                 break;
               case "a":
-                space.accelerate(1,1,0)
+                space.accelerate(1,-1,0)
                 break;
               case "s":
                 space.accelerate(1,0,1);
                 break;
               case "d":
-                space.accelerate(1,-1,0);
-                console.log("d")
+                space.accelerate(1,1,0);
                 break;
               default:
-                // console.log(event.key)
                 return; // Quit when this doesn't handle the key event.
             }
-          
             // Cancel the default action to avoid it being handled twice
             event.preventDefault();
           }, true);
@@ -72,6 +67,6 @@ const runWasm = async () => {
   	};
   	setInterval(() =>{
     	tick();
-  	}, 50)
+  	}, 1)
 };
 runWasm();
