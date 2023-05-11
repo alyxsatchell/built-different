@@ -1,16 +1,10 @@
-use std::thread::JoinHandle;
-use std::sync::mpsc::{channel, Sender, Receiver};
-use std::thread;
-use std::time::Duration;
-
 use wasm_bindgen::prelude::*;
-use web_sys;
 
-use crate::vector::{Point, Vector};
-use crate::player::{Player, Direction};
+use crate::vector::{Point};
+use crate::player::{Player};
 use crate::object::Object;
 
-const space_cell: Cell = Cell{color: Color { r: 0, b: 0, g: 0, a: 255 }, occupied: false};
+const SPACE_CELL: Cell = Cell{color: Color { r: 0, b: 0, g: 0, a: 255 }, occupied: false};
 
 
 #[derive(PartialEq, Eq)]
@@ -52,8 +46,8 @@ impl CellGrid{
         let mut grid = Vec::new();
         for h in 0..height as i32{
             grid.push(Vec::new());
-            for w in 0..width as i32{
-                grid[h as usize].push(space_cell.clone());
+            for _ in 0..width as i32{
+                grid[h as usize].push(SPACE_CELL.clone());
             }
         }
         CellGrid { grid}
@@ -84,7 +78,7 @@ impl CellGrid{
         for (i,_) in &player.occupied_space{
             let cell = self.get_mut(i);
             if cell.is_some(){
-                *cell.unwrap() = space_cell.clone();
+                *cell.unwrap() = SPACE_CELL.clone();
             }
         }
         let occupied_space = player.make_circle();

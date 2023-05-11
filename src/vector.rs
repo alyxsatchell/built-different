@@ -1,4 +1,3 @@
-use wasm_bindgen::prelude::*;
 use rand::prelude::*;
 use std::ops::{Index, IndexMut, Add, Sub, AddAssign};
 
@@ -53,7 +52,6 @@ impl Sub<Point> for Point{
     fn sub(self, other: Point) -> Point {
         let x = self.x - other.x;
         let y = self.y - other.y;
-        let magnitude = ((f64::powf(x,2.0) + f64::powf(y,2.0)) as f64).sqrt();
         return Point{x,y}
     } 
 }

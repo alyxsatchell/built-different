@@ -1,4 +1,3 @@
-use wasm_bindgen::prelude::*;
 pub mod vector;
 pub mod space;
 pub mod player;
@@ -27,6 +26,6 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let space = Space::new();
+        let _ = Space::new();
     }
 }

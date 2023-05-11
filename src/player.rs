@@ -1,5 +1,3 @@
-use wasm_bindgen::prelude::wasm_bindgen;
-
 use crate::{vector::Vector, vector::Point, space::Color, velocity::Velocity, material::Material, object::Object};
 
 pub enum Direction{
