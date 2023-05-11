@@ -115,7 +115,7 @@ impl Space{
         let mut grid = CellGrid::new(width, height);
         let player = Player::new();
         let player2 = Player::new();
-        *grid.get_mut(&player.vector.origin).unwrap() = Cell{color: player.color, occupied: true};
+        *grid.get_mut(&player.velocity.origin).unwrap() = Cell{color: player.color, occupied: true};
         let players = vec![player, player2];
 
         Space {size: Point{x:width, y:height}, grid, players, canvas}
@@ -144,7 +144,7 @@ impl Space{
 
     fn turn(&mut self){
         for player in &mut self.players{
-            player.vector.translate(&self.size);
+            player.velocity.translate(&self.size);
             self.grid.insert_player(player);
         }
     }

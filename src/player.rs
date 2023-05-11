@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::{vector::Vector, vector::Point, space::Color};
+use crate::{vector::Vector, vector::Point, space::Color, velocity::Velocity};
 
 pub enum Direction{
     Up,
@@ -11,7 +11,7 @@ pub enum Direction{
 
 pub struct Player{
     pub size: i32,
-    pub vector: Vector,
+    pub velocity: Velocity,
     pub speed: f64,
     pub color: Color,
     pub occupied_space: Vec<Point>
@@ -21,10 +21,10 @@ pub struct Player{
 impl Player {
     pub fn new() -> Player{
         let size = 2;
-        let vector = Vector::zero();
-        let speed = 0.5;
+        let velocity = Velocity::zero();
+        let speed = 0.5; //placeholder until momentum and force are added
         let color = Color::new(255,255,255,255);
-        return Player {size, vector, speed, color, occupied_space: Vec::new()}
+        return Player {size, velocity, speed, color, occupied_space: Vec::new()}
     }
 
     // pub fn accelerate(&mut self, direction: Direction){
@@ -32,14 +32,14 @@ impl Player {
     //     self.vector += direction_vector;
     // }
     pub fn accelerate(&mut self, x: f64, y: f64){
-        let acceleration_vector = Vector{origin: Point{x:0.0,y:0.0}, x: self.speed * x, y: self.speed * y, modifier: 1.0, magnitude: 0.0};
-        self.vector += acceleration_vector;
+        let acceleration_vector = Vector::new(x,y);
+        self.velocity += acceleration_vector;
     }
 
 
     pub fn make_circle(&self) -> Vec<Point>{
         let mut circle_vec = Vec::new();
-        let origin = self.vector.origin.clone();
+        let origin = self.velocity.origin.clone();
         for x in 0..=self.size as i32{
             for y in 0..=self.size as i32{
                 if calc_circle(x, y) <= self.size{

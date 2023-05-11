@@ -2,6 +2,7 @@ use wasm_bindgen::prelude::*;
 pub mod vector;
 pub mod space;
 pub mod player;
+pub mod velocity;
 
 // use crate::space::Space;
 
