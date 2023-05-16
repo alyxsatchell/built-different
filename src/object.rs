@@ -16,9 +16,11 @@ pub trait Object{
 
     fn get_pos(&self) -> &Point;
 
-    fn make_body(size: f64) -> Body;
+    fn make_body(&self, size: f64) -> Body;
 
     fn draw(&self) -> Vec<(Point, Material)>;
+
+    fn get_size(&self) -> f64;
 }
 
 pub struct Body{
@@ -30,5 +32,9 @@ pub struct Body{
 impl Body{
     pub fn new(size: f64, grid: Vec<(Point, Material)>, base_material: Material) -> Body{
         Body{size, grid, base_material}
+    }
+
+    pub fn null_body() -> Body{
+        Body { grid: Vec::new(), size: 0., base_material: Material { density: 0., color: Color { r: 0, b: 0, g: 0, a: 0 } } }
     }
 }

@@ -20,12 +20,19 @@ pub struct Player{
 impl Player {
     pub fn new() -> Player{
         let mass = 1.;
-        let body = Player::make_body(2.);
-        // let size = 2;
+        let body = Body::null_body();
         let velocity = Velocity::zero();
         let speed = 0.5; //placeholder until momentum and force are added
         let color = Color::new(255,255,255,255);
-        return Player {mass, body, velocity, speed, color, occupied_space: Vec::new()}
+        let player = Player {mass, body, velocity, speed, color, occupied_space: Vec::new()};
+        player.make_body(2.);
+        return player
+    }
+
+    pub fn tester(origin: Point, x: f64, y: f64, size: f64) -> Player{
+        let mut p1 = Player{mass:0., body: Body::null_body(), velocity: Velocity::new(origin, x, y), speed: 0., color: Color::new(0, 0,0,0), occupied_space: Vec::new()};
+        p1.body.size = size;
+        p1
     }
 }
 
@@ -55,7 +62,7 @@ impl Object for Player{
         self.velocity += acceleration_vector;
     }
 
-    fn make_body(size: f64) -> Body {
+    fn make_body(&self, size: f64) -> Body {
         let base_material = Material{density: 1., color: Color { r: 255, b: 255, g: 255, a: 255 }};
         let circle = make_circle(size, base_material.clone());
         Body::new(size, circle, base_material)
@@ -63,6 +70,10 @@ impl Object for Player{
 
     fn draw(&self) -> Vec<(Point, Material)>{
         make_circle(self.body.size, self.body.base_material.clone())
+    }
+
+    fn get_size(&self) -> f64 {
+        return self.body.size;
     }
 }
 
