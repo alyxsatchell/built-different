@@ -1,4 +1,4 @@
-use crate::{vector::Vector, vector::Point, space::Color, velocity::Velocity, material::Material, object::Object};
+use crate::{vector::Vector, vector::Point, space::Color, velocity::Velocity, object::{Object, Body}, material::Material};
 
 pub enum Direction{
     Up,
@@ -7,24 +7,9 @@ pub enum Direction{
     Right
 }
 
-pub struct Body{
-    pub grid: Vec<Vec<Material>>,
-    pub size: f64,
-    pub edges: Vec<Point>, //unclear how this will be used yet, possible ideas are list of vertices or just every edge point
-    pub occupied_space: Vec<Point>
-}
-
-impl Body{
-    //placeholder for now
-    pub fn new() -> Body{
-        Body{grid: Vec::new(), size: 0., edges: Vec::new(), occupied_space: Vec::new()}
-    }
-}
-
 pub struct Player{
     pub mass: f64,
     pub body: Body,
-    pub size: i32, //placeholder till i get bodies working
     pub velocity: Velocity,
     pub speed: f64, //placeholder till i get force working
     pub color: Color, //placeholder till i get bodies working
@@ -35,28 +20,12 @@ pub struct Player{
 impl Player {
     pub fn new() -> Player{
         let mass = 1.;
-        let body = Body::new();
-        let size = 2;
+        let body = Player::make_body(2.);
+        // let size = 2;
         let velocity = Velocity::zero();
         let speed = 0.5; //placeholder until momentum and force are added
         let color = Color::new(255,255,255,255);
-        return Player {size, mass, body, velocity, speed, color, occupied_space: Vec::new()}
-    }
-
-    pub fn make_circle(&self) -> Vec<(Point, Color)>{
-        let mut circle_vec = Vec::new();
-        let origin = self.velocity.origin.clone();
-        for x in 0..=self.size as i32{
-            for y in 0..=self.size as i32{
-                if calc_circle(x, y) <= self.size{
-                    circle_vec.push((Point{x: origin.x + x as f64, y: origin.y + y as f64}, self.color.clone()));
-                    circle_vec.push((Point{x: origin.x - x as f64, y: origin.y + y as f64}, self.color.clone()));
-                    circle_vec.push((Point{x: origin.x + x as f64, y: origin.y - y as f64}, self.color.clone()));
-                    circle_vec.push((Point{x: origin.x - x as f64, y: origin.y - y as f64}, self.color.clone()));
-                }
-            }
-        }
-        return circle_vec
+        return Player {mass, body, velocity, speed, color, occupied_space: Vec::new()}
     }
 }
 
@@ -86,11 +55,33 @@ impl Object for Player{
         self.velocity += acceleration_vector;
     }
 
-    fn draw(&self) -> Vec<(Point, Color)>{
-        self.make_circle()
+    fn make_body(size: f64) -> Body {
+        let base_material = Material{density: 1., color: Color { r: 255, b: 255, g: 255, a: 255 }};
+        let circle = make_circle(size, base_material.clone());
+        Body::new(size, circle, base_material)
+    }
+
+    fn draw(&self) -> Vec<(Point, Material)>{
+        make_circle(self.body.size, self.body.base_material.clone())
     }
 }
 
 pub fn calc_circle(x: i32, y: i32) -> i32{
     return (x.pow(2) as f64 + y.pow(2) as f64).sqrt().round() as i32
+}
+
+pub fn make_circle(size: f64, base_material: Material) -> Vec<(Point, Material)>{
+    let mut circle_vec = Vec::new();
+    let origin = Point{x:0.,y:0.};
+    for x in 0..=size as i32{
+        for y in 0..=size as i32{
+            if calc_circle(x, y) <= size as i32{
+                circle_vec.push((Point{x: origin.x + x as f64, y: origin.y + y as f64}, base_material.clone()));
+                circle_vec.push((Point{x: origin.x - x as f64, y: origin.y + y as f64}, base_material.clone()));
+                circle_vec.push((Point{x: origin.x + x as f64, y: origin.y - y as f64}, base_material.clone()));
+                circle_vec.push((Point{x: origin.x - x as f64, y: origin.y - y as f64}, base_material.clone()));
+            }
+        }
+    }
+    return circle_vec
 }

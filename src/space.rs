@@ -70,25 +70,24 @@ impl CellGrid{
         if p.x < 0.0 || p.x >= self.grid[p.y as usize].len() as f64{
             return None
         }
-        // Some(&mut self.grid[p.y as usize][p.x as usize])
         Some(&mut self.grid[p.x as usize][p.y as usize])
     }
 
     pub fn insert_player(&mut self, player: &mut Player){
-        for (i,_) in &player.occupied_space{
+        for (i,_) in &player.body.grid{
             let cell = self.get_mut(i);
             if cell.is_some(){
                 *cell.unwrap() = SPACE_CELL.clone();
             }
         }
-        let occupied_space = player.make_circle();
-        for (i, color) in &occupied_space{
+        let occupied_space = player.draw();
+        for (i, mat) in &occupied_space{
             let cell = self.get_mut(i);
             if cell.is_some(){
-                *cell.unwrap() = Cell{color: color.clone(), occupied: true};
+                *cell.unwrap() = Cell{color: mat.color.clone(), occupied: true};
             }
         }
-        player.occupied_space = occupied_space;
+        player.body.grid = occupied_space;
     }
 
 

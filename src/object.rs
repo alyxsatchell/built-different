@@ -1,4 +1,4 @@
-use crate::{player::Body, vector::Point, velocity::Velocity, space::Color};
+use crate::{vector::Point, velocity::Velocity, space::Color, material::Material};
 
 pub trait Object{
 
@@ -16,5 +16,19 @@ pub trait Object{
 
     fn get_pos(&self) -> &Point;
 
-    fn draw(&self) -> Vec<(Point, Color)>;
+    fn make_body(size: f64) -> Body;
+
+    fn draw(&self) -> Vec<(Point, Material)>;
+}
+
+pub struct Body{
+    pub grid: Vec<(Point,Material)>,
+    pub size: f64,
+    pub base_material: Material
+}
+
+impl Body{
+    pub fn new(size: f64, grid: Vec<(Point, Material)>, base_material: Material) -> Body{
+        Body{size, grid, base_material}
+    }
 }
