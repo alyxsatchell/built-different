@@ -1,4 +1,4 @@
-use crate::{vector::Vector, vector::Point, space::Color, velocity::Velocity, object::{Object, Body}, material::Material};
+use crate::{vector::Vector, vector::Point, space::Color, velocity::Velocity, object::{Object, Body}, material::Material, physics::{post_collision_velocity, calculate_impulse}};
 
 pub enum Direction{
     Up,
@@ -63,7 +63,7 @@ impl Object for Player{
     }
 
     fn make_body(&self, size: f64) -> Body {
-        let base_material = Material{density: 1., color: Color { r: 255, b: 255, g: 255, a: 255 }};
+        let base_material = Material{density: 1., color: Color { r: 255, b: 255, g: 255, a: 255 }, coefficient_of_restitution: 1.};
         let circle = make_circle(size, base_material.clone());
         Body::new(size, circle, base_material)
     }
@@ -80,6 +80,30 @@ impl Object for Player{
         let x = self.velocity.origin.x + self.velocity.vector.x * t;
         let y = self.velocity.origin.y + self.velocity.vector.y * t;
         return  Point{x,y};
+    }
+
+    fn collide(&mut self, other: &mut dyn Object) {
+        let velocities = post_collision_velocity(self, other);
+        if velocities.is_none(){
+            return
+        }
+        let (vf1, vf2) = velocities.unwrap();
+        let j = calculate_impulse(self.mass, &self.velocity.vector, &vf1);
+        self.velocity.vector = vf1;
+        other.get_velocity_mut().vector = vf2;
+    }
+
+    fn get_edge_material(&self, n: &Vector) -> Material{
+        let mut material: Material = Material::null_material();
+        let resized_n = n.resize(self.body.size);
+        let p = Point{x: resized_n.x + self.velocity.origin.x, y: resized_n.y + self.velocity.origin.y};
+        for (point, mat) in &self.body.grid{
+            if p == *point{
+                material = mat.clone();
+                break
+            }
+        }
+        return material
     }
 }
 

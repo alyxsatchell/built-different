@@ -1,5 +1,6 @@
 use rand::prelude::*;
 use std::ops::{Index, IndexMut, Add, Sub, AddAssign, Mul};
+use std::cmp::{PartialEq,Eq};
 
 #[derive(Clone)]
 pub struct Point{
@@ -20,6 +21,16 @@ impl Point{
         let y = self.y - other.y;
         Vector { x, y, magnitude: Vector::magnitude(x, y)}
     }
+
+}
+
+impl PartialEq for Point{
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y
+    }
+}
+
+impl Eq for Point{
 
 }
 

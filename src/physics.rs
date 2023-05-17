@@ -1,4 +1,4 @@
-use crate::{object::Object, vector::Vector};
+use crate::{object::Object, vector::Vector, velocity::Velocity};
 
 const i_vector: Vector = Vector{x:1., y:0., magnitude: 1.};
 const j_vector: Vector = Vector{x:0., y:1., magnitude: 1.};
@@ -63,13 +63,15 @@ pub fn collision_velocity(cor: f64, v1: f64, v2: f64, m1: f64, m2: f64) -> f64{
     return (step1 + step2) / step3
 }
 
-pub fn post_collision_velocity(body1: &dyn Object, body2: &dyn Object, cor: f64) -> Option<(Vector, Vector)>{
+pub fn post_collision_velocity(body1: &dyn Object, body2: &dyn Object) -> Option<(Vector, Vector)>{
     //normal vector of the collision
     let n = get_collision_normal(body1, body2);
     //checks if the collision even occurred
     if n.is_none(){
         return None
     }
+    let edge_material = body1.get_edge_material(&n.as_ref().unwrap());
+    let cor = edge_material.coefficient_of_restitution;
     //gets the components of the first body
     let (xi1, yi1) = &body1.get_velocity().vector.split(&n.as_ref().unwrap());
     let m1 = body1.get_mass();
@@ -87,4 +89,10 @@ pub fn post_collision_velocity(body1: &dyn Object, body2: &dyn Object, cor: f64)
     let mut vector2 = Vector::new(xf2, yf2);
     vector2.rotate(&i_vector);
     return Some((vector1,vector2));
+}
+
+pub fn calculate_impulse(m: f64, v1: &Vector, v2: &Vector) -> (f64, f64){
+    let x = m * (v2.x - v1.x);
+    let y = m * (v2.y - v1.y);
+    return (x,y)
 }
