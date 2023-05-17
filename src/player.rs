@@ -75,6 +75,12 @@ impl Object for Player{
     fn get_size(&self) -> f64 {
         return self.body.size;
     }
+
+    fn translate_pos(&self, t: f64) -> Point {
+        let x = self.velocity.origin.x + self.velocity.vector.x * t;
+        let y = self.velocity.origin.y + self.velocity.vector.y * t;
+        return  Point{x,y};
+    }
 }
 
 pub fn calc_circle(x: i32, y: i32) -> i32{

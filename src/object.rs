@@ -21,6 +21,8 @@ pub trait Object{
     fn draw(&self) -> Vec<(Point, Material)>;
 
     fn get_size(&self) -> f64;
+
+    fn translate_pos(&self, t: f64) -> Point;
 }
 
 pub struct Body{

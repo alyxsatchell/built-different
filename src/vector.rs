@@ -1,5 +1,5 @@
 use rand::prelude::*;
-use std::ops::{Index, IndexMut, Add, Sub, AddAssign};
+use std::ops::{Index, IndexMut, Add, Sub, AddAssign, Mul};
 
 #[derive(Clone)]
 pub struct Point{
@@ -13,6 +13,12 @@ impl Point{
         let x = rng.gen_range(0..=100) as f64;
         let y = rng.gen_range(0..=100) as f64;
         return Point{x,y}
+    }
+
+    pub fn between(&self, other: &Point) -> Vector{
+        let x = self.x - other.x;
+        let y = self.y - other.y;
+        Vector { x, y, magnitude: Vector::magnitude(x, y)}
     }
 
 }
@@ -80,6 +86,49 @@ impl Vector{
 
     fn magnitude(x:f64, y:f64) -> f64{
         ((f64::powf(x,2.0) + f64::powf(y,2.0)) as f64).sqrt()
+    }
+
+    pub fn resize(& self, new_mag: f64) -> Vector{
+        let k = new_mag / self.magnitude;
+        let x = self.x * k;
+        let y = self.y * k;
+        Vector {x, y, magnitude: k }
+    }
+
+    pub fn normal(&self) -> Vector{
+        Vector::new(-self.x, self.y)
+    }
+
+    pub fn angle_between(&self, other: &Vector) -> f64{
+        ((self * other) / (self.magnitude * other.magnitude)).acos()
+    }
+
+    pub fn split(&self, other: &Vector) -> (f64, f64){
+        let theta = self.angle_between(other);
+        let x = self.magnitude * theta.cos();
+        let y = self.magnitude * theta.sin();
+        return (x,y)
+    }
+
+    pub fn rotate(&mut self, other: &Vector){
+        let (x,y) = self.split(other);
+        self.x = x;
+        self.y = y;
+        self.magnitude = Vector::magnitude(x, y);
+    }
+}
+
+impl Mul<Vector> for Vector {
+    type Output = f64;
+    fn mul(self, other: Vector) -> Self::Output {
+        self.x * other.x + self.y * other.y
+    }
+}
+
+impl Mul<&Vector> for &Vector {
+    type Output = f64;
+    fn mul(self, other: &Vector) -> Self::Output {
+        self.x * other.x + self.y * other.y
     }
 }
 
