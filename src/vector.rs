@@ -1,5 +1,5 @@
 use rand::prelude::*;
-use std::ops::{Index, IndexMut, Add, Sub, AddAssign, Mul};
+use std::ops::{Index, IndexMut, Add, Sub, AddAssign, Mul, MulAssign};
 use std::cmp::{PartialEq,Eq};
 
 #[derive(Clone)]
@@ -80,6 +80,13 @@ impl AddAssign<Point> for Point{
     }
 }
 
+impl AddAssign<Vector> for &mut Point{
+    fn add_assign(&mut self, other: Vector) {
+        self.x += other.x;
+        self.y += other.y;
+    }
+}
+
 pub struct Vector{
     pub x: f64,
     pub y: f64,
@@ -116,6 +123,10 @@ impl Vector{
 
     pub fn split(&self, other: &Vector) -> (f64, f64){
         let theta = self.angle_between(other);
+        //println!("{} theata", theta);
+        if theta.is_nan(){ //this is caused by the original vector being a zero vector
+            return (0.,0.)
+        }
         let x = self.magnitude * theta.cos();
         let y = self.magnitude * theta.sin();
         return (x,y)
@@ -126,6 +137,11 @@ impl Vector{
         self.x = x;
         self.y = y;
         self.magnitude = Vector::magnitude(x, y);
+    }
+
+    pub fn translate_magnitude(&self, mut point: &mut Point, magnitude: f64){
+        let temp_vector = self.resize(magnitude);
+        point += temp_vector;
     }
 }
 
@@ -168,5 +184,12 @@ impl AddAssign<Vector> for Vector{
         self.x += other.x;
         self.y += other.y;
         self.magnitude = ((f64::powf(self.x,2.0) + f64::powf(self.y,2.0)) as f64).sqrt();
+    }
+}
+
+impl MulAssign<f64> for Vector{
+    fn mul_assign(&mut self, other: f64) {
+        self.x *= other;
+        self.y *= other;
     }
 }
