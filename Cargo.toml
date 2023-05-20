@@ -17,3 +17,4 @@ path = "src/bin/main.rs"
 
 [dependencies]
 rand = "0.8.5"
+image = "0.24.6"

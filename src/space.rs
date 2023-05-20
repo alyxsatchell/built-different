@@ -106,7 +106,7 @@ pub struct Space{
     // players: Vec<ObjectCell>,
     player1: Box<dyn Object>,
     player2: Box<dyn Object>,
-    canvas: Vec<u8>
+    pub canvas: Vec<u8>
 }
 
 // #[wasm_bindgen]
@@ -126,7 +126,7 @@ impl Space{
         Space {size: Point{x:width, y:height}, grid, canvas, player1: Box::new(player1), player2: Box::new(player2), cor}
     }
 
-    fn push_canvas(&mut self){
+    fn update_canvas(&mut self){
         let mut red: u8;
         let mut blue: u8;
         let mut green: u8;
@@ -143,11 +143,30 @@ impl Space{
         }
     }
 
+    pub fn push_canvas(&self) -> Vec<u8>{
+        let mut image = vec![0;self.size.x as usize * self.size.y as usize *4];
+        let mut red: u8;
+        let mut blue: u8;
+        let mut green: u8;
+        let mut alpha: u8;
+        for (x, row) in self.grid.grid.iter().enumerate(){
+            for (y, cell) in row.iter().enumerate(){
+                (red, green, blue, alpha) = cell.color.get_values();
+                let index: usize = ((y as i32 * self.size.x as i32 + x as i32) * 4) as usize;
+                    image[index] = red;
+                    image[index + 1] = green;
+                    image[index + 2] = blue;
+                    image[index + 3] = alpha;
+            }
+        }
+        return image
+    }
+
     pub fn get_canvas(&self) -> *const u8{
         return self.canvas.as_ptr()
     }
 
-    fn turn(&mut self){
+    pub fn turn(&mut self){
         // let player1 = &self.players[0];
         // let player2 = &self.players[1].borrow_mut();
 
@@ -199,7 +218,7 @@ impl Space{
     pub fn tick(&mut self){
         // web_sys::console::log_1(&"beans".into());
         self.turn();
-        self.push_canvas();
+        self.update_canvas();
     }
 
     pub fn accelerate(&mut self, id: i32, x: f64, y: f64){

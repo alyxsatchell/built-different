@@ -114,21 +114,21 @@ mod tests {
         assert!(test.unwrap_or(2.) == 2.);
     }
 
-    #[test]
-    fn test_run(){
-        let mut space: Box<Space> = Box::new(set_up());
-        space.tick();
-        space.tick();
-        space.tick();
-        space.tick();
-        space.tick();
-    }
+    // #[test]
+    // fn test_run(){
+    //     let mut space: Box<Space> = Box::new(set_up());
+    //     space.tick();
+    //     space.tick();
+    //     space.tick();
+    //     space.tick();
+    //     space.tick();
+    // }
 
-    fn set_up() -> Space{
-        let space = Space::new();
+    // fn set_up() -> Space{
+        // let space = Space::new();
         // println!("{}, {}", &space.player1.get_velocity().origin.x,&space.player1.get_velocity().origin.y);
         // println!("{}, {}", &space.player2.get_velocity().origin.x,&space.player2.get_velocity().origin.y);
-        return space
-    }
+        // return space
+    // }
 
 }

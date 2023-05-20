@@ -1,4 +1,5 @@
-use built_different_lib::{self, velocity::{Velocity, self}, vector::Point, player::Player};
+use built_different_lib::{self, velocity::{Velocity}, vector::Point, player::Player};
+use image::{self, Frame, ImageBuffer, Rgba, open};
 
 use crate::built_different_lib::space::Space;
 
@@ -64,18 +65,28 @@ fn default_set_up() -> Box<Space>{
 }
 
 fn inverse_default_set_up() -> Box<Space>{
-    let player1 = Player::create(Velocity::new(Point{x:0.,y: 0.}, 0., 0.), 1.);
-    let player2 = Player::create(Velocity::new(Point { x: 7., y: 0. }, -1., 0.), 1.);
+    let player1 = Player::create(Velocity::new(Point{x:50.,y: 50.}, 0., 0.), 1.);
+    let player2 = Player::create(Velocity::new(Point { x: 57., y: 50. }, -1., 0.), 1.);
+    Box::new(Space::new(player1, player2, 1.))
+}
+
+fn glance() -> Box<Space>{
+    let player1 = Player::create(Velocity::new(Point{x:50.,y: 50.}, 1.5, 0.5), 1.);
+    let player2 = Player::create(Velocity::new(Point { x: 25., y: 25. }, -1., 3.), 1.);
     Box::new(Space::new(player1, player2, 1.))
 }
 
 fn main(){
     // let mut space = set_up();
     // let mut space = default_set_up();
-    let mut space = inverse_default_set_up();
+    // let mut space = inverse_default_set_up();
+    let mut space = glance();
     let mut num_of_ticks: String = String::new();
     Input::get_input(&mut num_of_ticks, "Input Number Of Simulated Ticks");
     for i in 0..num_of_ticks.split("\n").collect::<Vec<&str>>()[0].parse::<i32>().unwrap(){
-        space.tick();
+        space.turn();
+        let img1 = ImageBuffer::<Rgba<u8>, Vec<u8>>::from_raw(100, 100, space.push_canvas()).unwrap();
+        let filename = format!("images/{i}.png");
+        img1.save(&filename);
     }
 }
