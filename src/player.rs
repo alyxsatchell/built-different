@@ -81,7 +81,7 @@ impl Object for Player{
     }
 
     fn draw(&self) -> Vec<(Point, Material)>{
-        println!("Player At {},{} With A Velocity Of {},{}", &self.velocity.origin.x, &self.velocity.origin.y, &self.velocity.vector.x, &self.velocity.vector.y);
+        // println!("Player At {},{} With A Velocity Of {},{}", &self.velocity.origin.x, &self.velocity.origin.y, &self.velocity.vector.x, &self.velocity.vector.y);
         make_circle(self.body.size, self.body.base_material.clone(), &self.velocity.origin)
     }
 
@@ -106,10 +106,11 @@ impl Object for Player{
             // println!("its nan");
             return None
         }
-        if t > 1.{
+        if t > 1. || t < 0.{
             return Some(t)
         }
         let j = calculate_impulse(self.mass, &self.velocity.vector, &vf1);
+        println!("Vi Of Body 1 was: {}, V2 of Body 1 was: {}\nVi of Body 2 was: {}, V2 of Body 2 was: {}", self.velocity, &vf1, &other.get_velocity(), &vf2);
         println!("The Impulse Of The Collision On Body 1 Was: {}", j.0);
         self.velocity.vector = vf1;
         other.get_velocity_mut().vector = vf2;

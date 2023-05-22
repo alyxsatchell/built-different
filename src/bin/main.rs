@@ -71,8 +71,8 @@ fn inverse_default_set_up() -> Box<Space>{
 }
 
 fn glance() -> Box<Space>{
-    let player1 = Player::create(Velocity::new(Point{x:50.,y: 50.}, 1.5, 0.5), 1.);
-    let player2 = Player::create(Velocity::new(Point { x: 25., y: 25. }, -1., 3.), 1.);
+    let player1 = Player::create(Velocity::new(Point{x:50.,y: 50.}, 1.5, 5.5), 1.);
+    let player2 = Player::create(Velocity::new(Point { x: 25., y: 25. }, -1., 3.5), 1.);
     Box::new(Space::new(player1, player2, 1.))
 }
 

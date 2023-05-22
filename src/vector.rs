@@ -1,6 +1,7 @@
 use rand::prelude::*;
 use std::ops::{Index, IndexMut, Add, Sub, AddAssign, Mul, MulAssign};
 use std::cmp::{PartialEq,Eq};
+use std::fmt;
 
 #[derive(Clone)]
 pub struct Point{
@@ -191,5 +192,11 @@ impl MulAssign<f64> for Vector{
     fn mul_assign(&mut self, other: f64) {
         self.x *= other;
         self.y *= other;
+    }
+}
+
+impl fmt::Display for Vector{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({},{})", self.x, self.y)
     }
 }

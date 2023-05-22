@@ -169,7 +169,6 @@ impl Space{
     pub fn turn(&mut self){
         // let player1 = &self.players[0];
         // let player2 = &self.players[1].borrow_mut();
-
         let magnitude1_initial = self.player1.get_velocity().vector.magnitude;
         let magnitude2_initial = self.player2.get_velocity().vector.magnitude;
         let collision_time = self.player1.collide(&mut *self.player2, self.cor);
@@ -181,7 +180,7 @@ impl Space{
         // web_sys::console::log_1(&(t > 1.).into());
         // web_sys::console::log_1(&(t <= 1.).into());
         // println!("{},{} origin before turn", &self.player1.get_velocity().origin.x,&self.player1.get_velocity().origin.y);
-        println!("t = {}", t);
+        // println!("t = {}", t);
         if t > 1. || t < 0.{
             // println!("cant smell no collision");
             // web_sys::console::log_1(&"bean".into());
@@ -190,7 +189,7 @@ impl Space{
             // println!("{},{} origin before turn", &self.player1.get_velocity().origin.x,&self.player1.get_velocity().origin.y);
         }
         else{
-            println!("COLLISION");
+            println!("Collision");
             // web_sys::console::log_1(&"log am i right".into());
             //finds the point where the origin will be at collision
             let mut intermediate_point_1 = self.player1.translate_pos(t);

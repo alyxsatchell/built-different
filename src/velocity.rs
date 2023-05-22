@@ -1,5 +1,6 @@
 use rand::prelude::*;
 use std::ops::{Index, IndexMut, Add, Sub, AddAssign};
+use std::fmt;
 
 use crate::vector::{Vector, Point};
 
@@ -77,5 +78,11 @@ impl Sub<Vector> for Velocity{
 impl AddAssign<Vector> for Velocity{
     fn add_assign(&mut self, other: Vector) {
         self.vector += other;
+    }
+}
+
+impl fmt::Display for Velocity{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.vector)
     }
 }
