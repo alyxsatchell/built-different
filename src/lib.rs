@@ -104,6 +104,16 @@ mod tests {
     }
 
     #[test]
+    fn test_new_method(){
+        let body1 = Player::tester(Point{x: 22., y: 70.}, 1., 5., 1.);
+        let body2 = Player::tester(Point{x: 20., y: 6.}, -2., -3., 1.);
+        let (x,y,x0,y0, r1, r2) = physics::calculate_relative_values(&body1, &body2);
+        println!("{}, {}, {}, {}, {}, {}", x,y,x0,y0,r1,r2);
+        let time = physics::time_to_collision(x, y, x0, y0, r1, r2).unwrap() ;
+        println!("{}, {}", time.0, time.1)
+    }
+
+    #[test]
     fn collision_velocity_test1(){
         
     }

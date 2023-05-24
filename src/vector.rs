@@ -170,6 +170,16 @@ impl Add<Vector> for Vector {
     }
 }
 
+impl Add<&Vector> for &Vector{
+    type Output = Vector;
+    fn add(self, other: &Vector) -> Self::Output {
+        let x = self.x + other.x;
+        let y = self.y + other.y;
+        let magnitude = Vector::magnitude(x, y);
+        return Vector{x, y, magnitude}
+    }
+}
+
 impl Sub<Vector> for Vector{
     type Output = Vector;
     fn sub(self, other: Vector) -> Vector {

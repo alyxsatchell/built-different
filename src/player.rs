@@ -1,4 +1,4 @@
-use crate::{vector::Vector, vector::Point, space::Color, velocity::Velocity, object::{Object, Body}, material::Material, physics::{post_collision_velocity, calculate_impulse}};
+use crate::{vector::Vector, vector::Point, space::Color, velocity::Velocity, object::{Object, Body}, material::Material, physics::{post_collision_velocity, calculate_impulse, calculate_kinetic_energy, round}};
 
 pub enum Direction{
     Up,
@@ -110,8 +110,17 @@ impl Object for Player{
             return Some(t)
         }
         let j = calculate_impulse(self.mass, &self.velocity.vector, &vf1);
-        println!("Vi Of Body 1 was: {}, V2 of Body 1 was: {}\nVi of Body 2 was: {}, V2 of Body 2 was: {}", self.velocity, &vf1, &other.get_velocity(), &vf2);
+        let kei_1 = calculate_kinetic_energy(self.mass, self.velocity.vector.magnitude);
+        let kei_2 = calculate_kinetic_energy(*other.get_mass(), other.get_velocity().vector.magnitude);
+        let kef_1 = calculate_kinetic_energy(self.mass, vf1.magnitude);
+        let kef_2 = calculate_kinetic_energy(*other.get_mass(), vf2.magnitude);
+        let kei = kei_1 + kei_2;
+        let kef = kef_1 + kef_2;
+        // let kei = calculate_kinetic_energy(self.mass + other.get_mass(), (&self.velocity.vector + &other.get_velocity().vector).magnitude);
+        // let kef = calculate_kinetic_energy(self.mass + other.get_mass(), (&vf1 + &vf2).magnitude);
+        println!("Vi Of Body 1 was: {}, Vf of Body 1 was: {}\nVi of Body 2 was: {}, Vf of Body 2 was: {}", self.velocity, &vf1, &other.get_velocity(), &vf2);
         println!("The Impulse Of The Collision On Body 1 Was: {}", j.0);
+        println!("The Total Kinetic Energy Before The Collision Was: {}, The Total Kinetic Energy After The Collision Was: {}, Which Is A Loss of {}", round(kei), round(kef), round(kei - kef));
         self.velocity.vector = vf1;
         other.get_velocity_mut().vector = vf2;
         return Some(t)
