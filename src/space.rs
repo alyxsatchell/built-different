@@ -189,7 +189,7 @@ impl Space{
             // println!("{},{} origin before turn", &self.player1.get_velocity().origin.x,&self.player1.get_velocity().origin.y);
         }
         else{
-            println!("Collision");
+            // println!("Collision");
             // web_sys::console::log_1(&"log am i right".into());
             //finds the point where the origin will be at collision
             let mut intermediate_point_1 = self.player1.translate_pos(t);

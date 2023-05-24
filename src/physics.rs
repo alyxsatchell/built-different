@@ -3,6 +3,12 @@ use crate::{object::Object, vector::Vector, velocity::Velocity};
 const i_vector: Vector = Vector{x:1., y:0., magnitude: 1.};
 const j_vector: Vector = Vector{x:0., y:1., magnitude: 1.};
 
+pub fn round(value: f64) -> f64{
+    let modifier = 10.0_f64.powi(2);
+    let inter: i32 = (value * modifier).round() as i32;
+    return inter as f64 / modifier
+}
+
 pub fn solve_quadratic(a: f64,b: f64,c: f64) -> Option<(f64, f64)>{
     let mut discriminate = b.powf(2.) - 4. * a * c;
     //println!("a = {}", &a);
@@ -92,8 +98,8 @@ pub fn post_collision_velocity(body1: &dyn Object, body2: &dyn Object, cor: f64)
     //finds the components of the final velocities of the 2 bodies
     let xf1 = collision_velocity(cor, *xi1, *xi2, *m1, *m2) * -1.;
     let yf1 = collision_velocity(cor, *yi1, *yi2, *m1, *m2) * -1.;
-    let xf2 = collision_velocity(cor, *xi2, *xi1, *m1, *m2) * -1.;
-    let yf2 = collision_velocity(cor, *yi2, *yi1, *m1, *m2) * -1.;
+    let xf2 = collision_velocity(cor, *xi2, *xi1, *m2, *m1) * -1.;
+    let yf2 = collision_velocity(cor, *yi2, *yi1, *m2, *m1) * -1.;
     //makes the new vectors the bodies will use and rotates them back to the normal xy plane
     let mut vector1 = Vector::new(xf1,yf1);
     vector1.rotate(&i_vector);
@@ -107,4 +113,8 @@ pub fn calculate_impulse(m: f64, v1: &Vector, v2: &Vector) -> (f64, f64){
     let x = m * (v2.x - v1.x);
     let y = m * (v2.y - v1.y);
     return (x,y)
+}
+
+pub fn calculate_kinetic_energy(m: f64, v: f64) -> f64{
+    return 0.5 * m * v.powf(2.)
 }
