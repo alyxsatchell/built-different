@@ -68,7 +68,7 @@ fn one_motion_elastic() -> Box<Space>{
 }
 
 fn two_motion_elastic() -> Box<Space>{
-    let player1 = Player::create(Velocity::new(Point{x:75.,y: 75.}, 0.5, 0.5), MASS1);
+    let player1 = Player::create(Velocity::new(Point{x:80.,y: 80.}, 0.5, 0.5), MASS1);
     let player2 = Player::create(Velocity::new(Point { x: 85., y: 85. }, -0., -0.), MASS2);
     Box::new(Space::new(player1, player2, 1.))
 }
@@ -131,18 +131,18 @@ fn main(){
     // let mut space = set_up();
     // let mut space = default_set_up();
     // let mut space = inverse_default_set_up();
-    // let mut space = glance();
+    let mut space = glance();
     // let mut space = default_set_up_partial_elastic();
     // let mut space = one_motion_elastic();
     // let mut space = two_motion_head_on_inelastic();
     // let mut space = two_motion_chase_partial_elastic();
-    let mut space = two_motion_elastic();
+    // let mut space = two_motion_elastic();
     let mut num_of_ticks: String = String::new();
     Input::get_input(&mut num_of_ticks, "Input Number Of Simulated Ticks");
     for i in 0..num_of_ticks.split("\n").collect::<Vec<&str>>()[0].parse::<i32>().unwrap(){
         space.turn();
         let img1 = ImageBuffer::<Rgba<u8>, Vec<u8>>::from_raw(100, 100, space.push_canvas()).unwrap();
-        let filename = format!("project_frames/testing/{i}.png");
+        let filename = format!("project_frames/good_glance/{i}.png");
         img1.save(&filename);
     }
 }

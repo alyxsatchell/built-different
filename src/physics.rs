@@ -89,7 +89,7 @@ pub fn post_collision_velocity(body1: &dyn Object, body2: &dyn Object, cor: f64)
     // let edge_material = body1.get_edge_material(&n);
     // let cor = edge_material.coefficient_of_restitution;
     //gets the components of the first body
-    println!("{}", &n);
+    // println!("{}", &n);
     //good--blow
     // let (xi1, yi1) = &body1.get_velocity().vector.split(&n);
     let temp1 = body1.get_velocity();
@@ -103,16 +103,19 @@ pub fn post_collision_velocity(body1: &dyn Object, body2: &dyn Object, cor: f64)
     let (xi2, yi2) = (&temp2.vector.x, &temp2.vector.y);
     let m2 = body2.get_mass();
     //finds the components of the final velocities of the 2 bodies
-    let xf1 = collision_velocity(cor, *xi1, *xi2, *m1, *m2) * -1.;
-    let yf1 = collision_velocity(cor, *yi1, *yi2, *m1, *m2) * -1.;
-    let xf2 = collision_velocity(cor, *xi2, *xi1, *m2, *m1) * -1.;
-    let yf2 = collision_velocity(cor, *yi2, *yi1, *m2, *m1) * -1.;
-    //makes the new vectors the bodies will use and rotates them back to the normal xy plane
-    let mut vector1 = Vector::new(xf1,yf1);
-    vector1.rotate(&i_vector);
-    // println!("The Second Vec {},{}", &xf2, &yf2);
-    let mut vector2 = Vector::new(xf2, yf2);
-    vector2.rotate(&i_vector);
+    let xf1 = collision_velocity(cor, *xi1, *xi2, *m1, *m2);
+    let yf1 = collision_velocity(cor, *yi1, *yi2, *m1, *m2);
+    let xf2 = collision_velocity(cor, *xi2, *xi1, *m2, *m1);
+    let yf2 = collision_velocity(cor, *yi2, *yi1, *m2, *m1);
+
+    let vector1 = Vector::new(xf1, yf1);
+    let vector2 = Vector::new(xf2, yf2);
+    // //makes the new vectors the bodies will use and rotates them back to the normal xy plane
+    // let mut vector1 = Vector::new(xf1,yf1);
+    // vector1.rotate(&i_vector);
+    // // println!("The Second Vec {},{}", &xf2, &yf2);
+    // let mut vector2 = Vector::new(xf2, yf2);
+    // vector2.rotate(&i_vector);
     return Some((vector1,vector2, t));
 }
 
