@@ -124,7 +124,7 @@ impl Vector{
 
     pub fn split(&self, other: &Vector) -> (f64, f64){
         let theta = self.angle_between(other);
-        //println!("{} theata", theta);
+        println!("{} theata", theta);
         if theta.is_nan(){ //this is caused by the original vector being a zero vector
             return (0.,0.)
         }

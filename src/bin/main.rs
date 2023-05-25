@@ -67,6 +67,12 @@ fn one_motion_elastic() -> Box<Space>{
     Box::new(Space::new(player1, player2, 1.))
 }
 
+fn two_motion_elastic() -> Box<Space>{
+    let player1 = Player::create(Velocity::new(Point{x:75.,y: 75.}, 0.5, 0.5), MASS1);
+    let player2 = Player::create(Velocity::new(Point { x: 85., y: 85. }, -0., -0.), MASS2);
+    Box::new(Space::new(player1, player2, 1.))
+}
+
 fn two_motion_head_on_inelastic() -> Box<Space>{
     let player1 = Player::create(Velocity::new(Point{x:45.,y: 30.}, 4.43, 0.), MASS1);
     let player2 = Player::create(Velocity::new(Point { x: 97., y: 30. }, -4.43, 0.), MASS2);
@@ -92,8 +98,8 @@ fn default_set_up() -> Box<Space>{
 }
 
 fn glance() -> Box<Space>{
-    let player1 = Player::create(Velocity::new(Point{x:15.,y: 15.}, 0.5, 0.5), 1.);
-    let player2 = Player::create(Velocity::new(Point { x: 45., y: 55. }, -1., -1.5), 1.);
+    let player1 = Player::create(Velocity::new(Point{x:15.,y: 15.}, 0.5, 0.5), MASS1);
+    let player2 = Player::create(Velocity::new(Point { x: 45., y: 55. }, -1., -1.5), MASS2);
     Box::new(Space::new(player1, player2, 1.))
 }
 
@@ -127,9 +133,10 @@ fn main(){
     // let mut space = inverse_default_set_up();
     // let mut space = glance();
     // let mut space = default_set_up_partial_elastic();
-    let mut space = one_motion_elastic();
+    // let mut space = one_motion_elastic();
     // let mut space = two_motion_head_on_inelastic();
     // let mut space = two_motion_chase_partial_elastic();
+    let mut space = two_motion_elastic();
     let mut num_of_ticks: String = String::new();
     Input::get_input(&mut num_of_ticks, "Input Number Of Simulated Ticks");
     for i in 0..num_of_ticks.split("\n").collect::<Vec<&str>>()[0].parse::<i32>().unwrap(){

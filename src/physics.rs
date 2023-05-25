@@ -89,11 +89,18 @@ pub fn post_collision_velocity(body1: &dyn Object, body2: &dyn Object, cor: f64)
     // let edge_material = body1.get_edge_material(&n);
     // let cor = edge_material.coefficient_of_restitution;
     //gets the components of the first body
-    let (xi1, yi1) = &body1.get_velocity().vector.split(&n);
+    println!("{}", &n);
+    //good--blow
+    // let (xi1, yi1) = &body1.get_velocity().vector.split(&n);
+    let temp1 = body1.get_velocity();
+    let (xi1, yi1) = (&temp1.vector.x, &temp1.vector.y);
     let m1 = body1.get_mass();
     //gets the components of the second body
     //println!("{}, {} body2 vel", &body2.get_velocity().vector.x, &body2.get_velocity().vector.y);
-    let (xi2, yi2) = &body2.get_velocity().vector.split(&n);
+    //--good below
+    // let (xi2, yi2) = &body2.get_velocity().vector.split(&n);
+    let temp2 = body2.get_velocity();
+    let (xi2, yi2) = (&temp2.vector.x, &temp2.vector.y);
     let m2 = body2.get_mass();
     //finds the components of the final velocities of the 2 bodies
     let xf1 = collision_velocity(cor, *xi1, *xi2, *m1, *m2) * -1.;
