@@ -26,7 +26,6 @@ impl Player {
         let color = Color::new(255,255,255,255);
         let mut player = Player {mass, body, velocity, speed, color, occupied_space: Vec::new()};
         player.make_body(2.);
-        // println!("bod length during const {}", &player.get_body().grid.len());
         return player
     }
 
@@ -36,7 +35,6 @@ impl Player {
         let color = Color::new(255,255,255,255);
         let mut player = Player {mass, body, velocity, speed, color, occupied_space: Vec::new()};
         player.make_body(2.);
-        // println!("bod length during const {}", &player.get_body().grid.len());
         return player
     }
 
@@ -76,12 +74,10 @@ impl Object for Player{
     fn make_body(&mut self, size: f64) {
         let base_material = Material{density: 1., color: Color { r: 255, b: 255, g: 255, a: 255 }, coefficient_of_restitution: 1.};
         let circle = make_circle(size, base_material.clone(), &self.velocity.origin);
-        // println!("circle len {}", &circle.len());
         self.body = Body::new(size, circle, base_material)
     }
 
     fn draw(&self) -> Vec<(Point, Material)>{
-        // println!("Player At {},{} With A Velocity Of {},{}", &self.velocity.origin.x, &self.velocity.origin.y, &self.velocity.vector.x, &self.velocity.vector.y);
         make_circle(self.body.size, self.body.base_material.clone(), &self.velocity.origin)
     }
 
@@ -98,12 +94,10 @@ impl Object for Player{
     fn collide(&mut self, other: &mut dyn Object, cor: f64) -> Option<f64>{
         let velocities = post_collision_velocity(self, other, cor);
         if velocities.is_none(){
-            // println!("its none");
             return None
         }
         let (vf1, vf2, t) = velocities.unwrap();
         if t.is_nan(){
-            // println!("its nan");
             return None
         }
         if t > 1. || t < 0.{
@@ -116,8 +110,6 @@ impl Object for Player{
         let kef_2 = calculate_kinetic_energy(*other.get_mass(), vf2.magnitude);
         let kei = kei_1 + kei_2;
         let kef = kef_1 + kef_2;
-        // let kei = calculate_kinetic_energy(self.mass + other.get_mass(), (&self.velocity.vector + &other.get_velocity().vector).magnitude);
-        // let kef = calculate_kinetic_energy(self.mass + other.get_mass(), (&vf1 + &vf2).magnitude);
         println!("Vi Of Body 1 was: {}, Vf of Body 1 was: {}\nVi of Body 2 was: {}, Vf of Body 2 was: {}", self.velocity, &vf1, &other.get_velocity(), &vf2);
         println!("The Impulse Of The Collision On Body 1 Was: {}", j.0);
         println!("The Total Kinetic Energy Before The Collision Was: {}, The Total Kinetic Energy After The Collision Was: {}, Which Is A Loss of {}", round(kei), round(kef), round(kei - kef));
@@ -127,14 +119,11 @@ impl Object for Player{
     }
 
     fn get_edge_material(&self, n: &Vector) -> Material{
-        // println!("or else");
         let mut material: Material = Material::null_material();
         let resized_n = n.resize(self.body.size);
         let p = Point{x: resized_n.x + self.velocity.origin.x, y: resized_n.y + self.velocity.origin.y};
-        // println!("{}, {}", &p.x, &p.y);
         for (point, mat) in &self.body.grid{
             if p == *point{
-                // println!("this line needs to get read");
                 material = mat.clone();
                 break
             }
@@ -147,15 +136,12 @@ impl Object for Player{
     }
 }
 
-//hopefully this is temporary
-
 pub fn calc_circle(x: i32, y: i32) -> i32{
     return (x.pow(2) as f64 + y.pow(2) as f64).sqrt().round() as i32
 }
 
 pub fn make_circle(size: f64, base_material: Material, origin: &Point) -> Vec<(Point, Material)>{
     let mut circle_vec = Vec::new();
-    // let origin = Point{x:0.,y:0.};
     for x in 0..=size as i32{
         for y in 0..=size as i32{
             if calc_circle(x, y) <= size as i32{

@@ -11,7 +11,6 @@ pub fn round(value: f64) -> f64{
 
 pub fn solve_quadratic(a: f64,b: f64,c: f64) -> Option<(f64, f64)>{
     let mut discriminate = b.powf(2.) - 4. * a * c;
-    //println!("a = {}", &a);
     if discriminate < 0.{
         return None
     }
@@ -43,11 +42,9 @@ pub fn calculate_relative_values(body1: &dyn Object, body2: &dyn Object) -> (f64
 pub fn time_to_collision(x: f64,y: f64,x0: f64,y0: f64, r1: f64, r2: f64) -> Option<(f64, f64)>{
     // 0 = t^2(x^2 + y^2) + t(2 * (x * x0 + y * y0)) + x0^2 + y0^2
     let a = x.powf(2.) + y.powf(2.);
-    //println!("x and y: {}, {}", &x, &y);
     let b = 2. * (x * x0 + y * y0);
     let c = x0.powf(2.) + y0.powf(2.) - (r1 + r2).powf(2.);
     let temp = solve_quadratic(a, b, c);
-    //println!("t = {}, {}", temp.unwrap().0, temp.unwrap().1);
     temp
 }
 
@@ -64,17 +61,14 @@ pub fn get_collision_normal(body1: &dyn Object, body2: &dyn Object) -> Option<(V
         return None
     }
     let t = time.unwrap().1;
-    // //println!("good ol t={}", t);
     return Some((get_collision_vectors(body1, body2, t).0, t));
 }
 
 pub fn collision_velocity(cor: f64, v1: f64, v2: f64, m1: f64, m2: f64) -> f64{
-    // println!("m1 {}, m2 {}, v1 {}, v2 {}", m1, m2, v1, v2);
     let step1 = cor * m2 * (v2 - v1);
     let step2 = m1 * v1 + m2 * v2;
     let step3 = m1 + m2;
     let temp = (step1 + step2) / step3;
-    //println!("{}, {}, {}", &step1, &step2, &step3);
     temp
 }
 

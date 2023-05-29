@@ -8,21 +8,6 @@ pub mod physics;
 
 use std::boxed::Box;
 
-// use crate::space::Space;
-
-// #[wasm_bindgen]
-// pub fn my_init_function() {
-//     panic::set_hook(Box::new(console_error_panic_hook::hook));
-// }
-
-// #[wasm_bindgen]
-// pub fn init_panic_hook() {
-//     console_error_panic_hook::set_once();
-// }
-// #[wasm_bindgen]
-// pub fn init_panic_hook() {
-//     console_error_panic_hook::set_once();
-// }
 #[cfg(test)]
 mod tests {
     use crate::object::Body;

@@ -75,17 +75,14 @@ impl CellGrid{
     }
 
     pub fn insert_player(&mut self, player: &mut dyn Object){
-        // println!("{}", &player.get_body().grid.len());
         for (i,_) in &player.get_body().grid{
             let cell = self.get_mut(i);
-            // println!("x: {},y: {}", &i.x, &i.y);
             if cell.is_some(){
                 *cell.unwrap() = SPACE_CELL.clone();
             }
         }
         let occupied_space = player.draw();
         for (i, mat) in &occupied_space{
-            // println!("occupied space moment: {},{}", &i.x, &i.y);
             let cell = self.get_mut(i);
             if cell.is_some(){
                 *cell.unwrap() = Cell{color: mat.color.clone(), occupied: true};
@@ -97,7 +94,6 @@ impl CellGrid{
 
 }
 
-// #[wasm_bindgen]
 pub struct Space{
     size: Point,
     grid: CellGrid,
@@ -224,14 +220,10 @@ impl Space{
         // if (id as usize) < self.players.len(){
         //     self.players[id as usize].borrow_mut().accelerate(x, y);
         // }
-        // web_sys::console::log_1(&id.into());
-        // web_sys::console::log_1(&"testing".into());
-        // web_sys::console::log_1(&"beans1".into());
         match id {
             0 => self.player1.accelerate(x, y),
             1 => self.player2.accelerate(x, y),
             _ => ()
         }
-        // web_sys::console::log_1(&"beans2".into());
     }
 }
