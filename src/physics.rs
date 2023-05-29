@@ -79,26 +79,14 @@ pub fn collision_velocity(cor: f64, v1: f64, v2: f64, m1: f64, m2: f64) -> f64{
 }
 
 pub fn post_collision_velocity(body1: &dyn Object, body2: &dyn Object, cor: f64) -> Option<(Vector, Vector, f64)>{
-    //normal vector of the collision
-    let collision = get_collision_normal(body1, body2);
-    //checks if the collision even occurred
-    if collision.is_none(){
+    let (x,y,x0,y0,r1,r2) = calculate_relative_values(body1, body2);
+    let t = time_to_collision(x, y, x0, y0, r1, r2);
+    if t.is_none(){
         return None
     }
-    let (n, t) = collision.unwrap();
-    // let edge_material = body1.get_edge_material(&n);
-    // let cor = edge_material.coefficient_of_restitution;
-    //gets the components of the first body
-    // println!("{}", &n);
-    //good--blow
-    // let (xi1, yi1) = &body1.get_velocity().vector.split(&n);
     let temp1 = body1.get_velocity();
     let (xi1, yi1) = (&temp1.vector.x, &temp1.vector.y);
     let m1 = body1.get_mass();
-    //gets the components of the second body
-    //println!("{}, {} body2 vel", &body2.get_velocity().vector.x, &body2.get_velocity().vector.y);
-    //--good below
-    // let (xi2, yi2) = &body2.get_velocity().vector.split(&n);
     let temp2 = body2.get_velocity();
     let (xi2, yi2) = (&temp2.vector.x, &temp2.vector.y);
     let m2 = body2.get_mass();
@@ -107,16 +95,9 @@ pub fn post_collision_velocity(body1: &dyn Object, body2: &dyn Object, cor: f64)
     let yf1 = collision_velocity(cor, *yi1, *yi2, *m1, *m2);
     let xf2 = collision_velocity(cor, *xi2, *xi1, *m2, *m1);
     let yf2 = collision_velocity(cor, *yi2, *yi1, *m2, *m1);
-
     let vector1 = Vector::new(xf1, yf1);
     let vector2 = Vector::new(xf2, yf2);
-    // //makes the new vectors the bodies will use and rotates them back to the normal xy plane
-    // let mut vector1 = Vector::new(xf1,yf1);
-    // vector1.rotate(&i_vector);
-    // // println!("The Second Vec {},{}", &xf2, &yf2);
-    // let mut vector2 = Vector::new(xf2, yf2);
-    // vector2.rotate(&i_vector);
-    return Some((vector1,vector2, t));
+    return Some((vector1,vector2, t.unwrap().1));
 }
 
 pub fn calculate_impulse(m: f64, v1: &Vector, v2: &Vector) -> (f64, f64){

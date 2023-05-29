@@ -2,7 +2,7 @@
 name = "built-different"
 version = "0.1.0"
 authors = ["KemoshCode <kemosh@live.com>"]
-description = "A little fish tank sim"
+description = "A Physics Based Game"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/KemoshCode/Built-Different"
 edition = "2018"
