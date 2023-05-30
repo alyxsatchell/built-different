@@ -1,4 +1,3 @@
-use std::borrow::Borrow;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::boxed::Box;
@@ -113,8 +112,8 @@ impl Space{
         let (width, height): (f64, f64) = (100.0, 100.0);
         let canvas: Vec<u8> = vec![0;width as usize * height as usize *4];
         let mut grid = CellGrid::new(width, height);
-        let player1: ObjectCell = Rc::new(RefCell::new(Box::new(Player::new(0., 0.))));
-        let player2: ObjectCell = Rc::new(RefCell::new(Box::new(Player::new(0., 0.))));
+        let player1: ObjectCell = Rc::new(RefCell::new(Box::new(player1)));
+        let player2: ObjectCell = Rc::new(RefCell::new(Box::new(player2)));
         let players: Vec<ObjectCell> = vec![player1, player2];
         Space {size: Point{x:width, y:height}, grid, canvas, players, cor}
     }
