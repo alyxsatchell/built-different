@@ -6,16 +6,11 @@ pub mod material;
 pub mod object;
 pub mod physics;
 
-use std::boxed::Box;
-
 #[cfg(test)]
 mod tests {
-    use crate::object::Body;
     use crate::player::Player;
-    use crate::space::Space;
     use crate::vector::Point;
-    use crate::{physics, velocity};
-    use crate::space::Color;
+    use crate::{physics};
 
     #[test]
     fn test_quadratic() {

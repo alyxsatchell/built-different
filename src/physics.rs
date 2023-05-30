@@ -1,7 +1,4 @@
-use crate::{object::Object, vector::Vector, velocity::Velocity};
-
-const i_vector: Vector = Vector{x:1., y:0., magnitude: 1.};
-const j_vector: Vector = Vector{x:0., y:1., magnitude: 1.};
+use crate::{object::Object, vector::Vector};
 
 pub fn round(value: f64) -> f64{
     let modifier = 10.0_f64.powi(2);

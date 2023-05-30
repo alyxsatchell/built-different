@@ -11,9 +11,6 @@ pub struct Player{
     pub mass: f64,
     pub body: Body,
     pub velocity: Velocity,
-    pub speed: f64, //placeholder till i get force working
-    pub color: Color, //placeholder till i get bodies working
-    pub occupied_space: Vec<(Point, Color)> //also placeholder till i get bodies working
 }
 
 
@@ -22,24 +19,20 @@ impl Player {
         let mass = 1.;
         let body = Body::null_body();
         let velocity = Velocity::new(Point{x: x,y: y}, 0., 0.);
-        let speed = 0.5; //placeholder until momentum and force are added
-        let color = Color::new(255,255,255,255);
-        let mut player = Player {mass, body, velocity, speed, color, occupied_space: Vec::new()};
+        let mut player = Player {mass, body, velocity};
         player.make_body(2.);
         return player
     }
 
     pub fn create(velocity: Velocity, mass: f64) -> Player{
         let body = Body::null_body();
-        let speed = 0.5; //placeholder until momentum and force are added
-        let color = Color::new(255,255,255,255);
-        let mut player = Player {mass, body, velocity, speed, color, occupied_space: Vec::new()};
+        let mut player = Player {mass, body, velocity};
         player.make_body(2.);
         return player
     }
 
     pub fn tester(origin: Point, x: f64, y: f64, size: f64) -> Player{
-        let mut p1 = Player{mass:0., body: Body::null_body(), velocity: Velocity::new(origin, x, y), speed: 0., color: Color::new(0, 0,0,0), occupied_space: Vec::new()};
+        let mut p1 = Player{mass:0., body: Body::null_body(), velocity: Velocity::new(origin, x, y)};
         p1.body.size = size;
         p1
     }

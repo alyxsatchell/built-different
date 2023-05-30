@@ -1,4 +1,4 @@
-use crate::{vector::{Point, Vector}, velocity::Velocity, space::Color, material::Material};
+use crate::{vector::{Point, Vector}, velocity::Velocity, material::Material};
 
 pub trait Object{
 

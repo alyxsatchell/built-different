@@ -143,6 +143,6 @@ fn main(){
         space.turn();
         let img1 = ImageBuffer::<Rgba<u8>, Vec<u8>>::from_raw(100, 100, space.push_canvas()).unwrap();
         let filename = format!("project_frames/testing/{i}.png");
-        img1.save(&filename);
+        img1.save(&filename).expect("failed to save image");
     }
 }
