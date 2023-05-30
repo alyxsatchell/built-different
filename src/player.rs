@@ -8,7 +8,6 @@ pub enum Direction{
 }
 
 pub struct Player{
-    pub mass: f64,
     pub body: Body,
     pub velocity: Velocity,
 }
@@ -16,23 +15,22 @@ pub struct Player{
 
 impl Player {
     pub fn new(x: f64, y: f64) -> Player{
-        let mass = 1.;
         let body = Body::null_body();
         let velocity = Velocity::new(Point{x: x,y: y}, 0., 0.);
-        let mut player = Player {mass, body, velocity};
+        let mut player = Player {body, velocity};
         player.make_body(2.);
         return player
     }
 
     pub fn create(velocity: Velocity, mass: f64) -> Player{
         let body = Body::null_body();
-        let mut player = Player {mass, body, velocity};
+        let mut player = Player {body, velocity};
         player.make_body(2.);
         return player
     }
 
     pub fn tester(origin: Point, x: f64, y: f64, size: f64) -> Player{
-        let mut p1 = Player{mass:0., body: Body::null_body(), velocity: Velocity::new(origin, x, y)};
+        let mut p1 = Player{body: Body::null_body(), velocity: Velocity::new(origin, x, y)};
         p1.body.size = size;
         p1
     }
@@ -40,7 +38,7 @@ impl Player {
 
 impl Object for Player{
     fn get_mass(&self) -> &f64 {
-        &self.mass
+        &self.body.mass
     }
 
     fn get_body(&self) -> &Body {
@@ -66,12 +64,12 @@ impl Object for Player{
 
     fn make_body(&mut self, size: f64) {
         let base_material = Material{density: 1., color: Color { r: 255, b: 255, g: 255, a: 255 }, coefficient_of_restitution: 1.};
-        let circle = make_circle(size, base_material.clone(), &self.velocity.origin);
-        self.body = Body::new(size, circle, base_material)
+        let (circle, mass) = make_circle(size, base_material.clone(), &self.velocity.origin);
+        self.body = Body::new(size, circle, base_material, mass)
     }
 
     fn draw(&self) -> Vec<(Point, Material)>{
-        make_circle(self.body.size, self.body.base_material.clone(), &self.velocity.origin)
+        make_circle(self.body.size, self.body.base_material.clone(), &self.velocity.origin).0
     }
 
     fn get_size(&self) -> f64 {
@@ -96,10 +94,10 @@ impl Object for Player{
         if t > 1. || t < 0.{
             return Some(t)
         }
-        let j = calculate_impulse(self.mass, &self.velocity.vector, &vf1);
-        let kei_1 = calculate_kinetic_energy(self.mass, self.velocity.vector.magnitude);
+        let j = calculate_impulse(*self.get_mass(), &self.velocity.vector, &vf1);
+        let kei_1 = calculate_kinetic_energy(*self.get_mass(), self.velocity.vector.magnitude);
         let kei_2 = calculate_kinetic_energy(*other.get_mass(), other.get_velocity().vector.magnitude);
-        let kef_1 = calculate_kinetic_energy(self.mass, vf1.magnitude);
+        let kef_1 = calculate_kinetic_energy(*self.get_mass(), vf1.magnitude);
         let kef_2 = calculate_kinetic_energy(*other.get_mass(), vf2.magnitude);
         let kei = kei_1 + kei_2;
         let kef = kef_1 + kef_2;
@@ -127,13 +125,19 @@ impl Object for Player{
     fn get_body_mut(&mut self) -> &mut Body {
         return &mut self.body;
     }
+
+    fn accelerate_force(&mut self, f: Vector) {
+        let (x,y) = (f.x / *self.get_mass(), f.y / *self.get_mass());
+        self.accelerate(x, y)
+    }
 }
 
 pub fn calc_circle(x: i32, y: i32) -> i32{
     return (x.pow(2) as f64 + y.pow(2) as f64).sqrt().round() as i32
 }
 
-pub fn make_circle(size: f64, base_material: Material, origin: &Point) -> Vec<(Point, Material)>{
+pub fn make_circle(size: f64, base_material: Material, origin: &Point) -> (Vec<(Point, Material)>, f64){
+    let mut mass = 0.;
     let mut circle_vec = Vec::new();
     for x in 0..=size as i32{
         for y in 0..=size as i32{
@@ -142,8 +146,9 @@ pub fn make_circle(size: f64, base_material: Material, origin: &Point) -> Vec<(P
                 circle_vec.push((Point{x: origin.x - x as f64, y: origin.y + y as f64}, base_material.clone()));
                 circle_vec.push((Point{x: origin.x + x as f64, y: origin.y - y as f64}, base_material.clone()));
                 circle_vec.push((Point{x: origin.x - x as f64, y: origin.y - y as f64}, base_material.clone()));
+                mass += base_material.density * 4.;
             }
         }
     }
-    return circle_vec
+    return (circle_vec, mass)
 }

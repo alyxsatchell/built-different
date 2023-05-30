@@ -8,8 +8,9 @@ pub mod physics;
 
 #[cfg(test)]
 mod tests {
+    use crate::object::Object;
     use crate::player::Player;
-    use crate::vector::Point;
+    use crate::vector::{Point, Vector};
     use crate::{physics};
 
     #[test]
@@ -84,24 +85,20 @@ mod tests {
     }
 
     #[test]
-    fn test_new_method(){
-        let body1 = Player::tester(Point{x: 22., y: 70.}, 1., 5., 1.);
-        let body2 = Player::tester(Point{x: 20., y: 6.}, -2., -3., 1.);
-        let (x,y,x0,y0, r1, r2) = physics::calculate_relative_values(&body1, &body2);
-        println!("{}, {}, {}, {}, {}, {}", x,y,x0,y0,r1,r2);
-        let time = physics::time_to_collision(x, y, x0, y0, r1, r2).unwrap() ;
-        println!("{}, {}", time.0, time.1)
-    }
-
-    #[test]
-    fn collision_velocity_test1(){
-        
-    }
-
-    #[test]
     fn testing_things(){
         let test = None;
         assert!(test.unwrap_or(2.) == 2.);
+    }
+
+    #[test]
+    fn test_accelerate_force(){
+        //mass = 32
+        let mut player = Player::new(0., 0.);
+        player.accelerate_force(Vector::new(1.,0.));
+        println!("{}", player.get_mass());
+        println!("{}", player.get_velocity().vector.x);
+        assert!(player.get_velocity().vector.x == 1./32.);
+        assert!(player.get_velocity().vector.y == 0.);
     }
 
     // #[test]

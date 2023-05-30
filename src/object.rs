@@ -14,7 +14,7 @@ pub trait Object{
 
     fn accelerate(&mut self, x: f64, y: f64); //currently used while I get force working
 
-    // fn accelerate_force(&mut self, f: Force); //For use once force is implemented
+    fn accelerate_force(&mut self, f: Vector); //For use once force is implemented
 
     fn get_pos(&self) -> &Point;
 
@@ -34,15 +34,16 @@ pub trait Object{
 pub struct Body{
     pub grid: Vec<(Point,Material)>,
     pub size: f64,
-    pub base_material: Material
+    pub base_material: Material,
+    pub mass: f64,
 }
 
 impl Body{
-    pub fn new(size: f64, grid: Vec<(Point, Material)>, base_material: Material) -> Body{
-        Body{size, grid, base_material}
+    pub fn new(size: f64, grid: Vec<(Point, Material)>, base_material: Material, mass: f64) -> Body{
+        Body{mass, size, grid, base_material}
     }
 
     pub fn null_body() -> Body{
-        Body { grid: Vec::new(), size: 0., base_material: Material::null_material() }
+        Body { mass: 0., grid: Vec::new(), size: 0., base_material: Material::null_material() }
     }
 }
