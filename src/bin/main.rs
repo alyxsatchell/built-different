@@ -142,7 +142,7 @@ fn main(){
     for i in 0..num_of_ticks.split("\n").collect::<Vec<&str>>()[0].parse::<i32>().unwrap(){
         space.turn();
         let img1 = ImageBuffer::<Rgba<u8>, Vec<u8>>::from_raw(100, 100, space.push_canvas()).unwrap();
-        let filename = format!("project_frames/good_glance/{i}.png");
+        let filename = format!("project_frames/testing/{i}.png");
         img1.save(&filename);
     }
 }

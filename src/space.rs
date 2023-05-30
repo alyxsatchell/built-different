@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::boxed::Box;
@@ -5,6 +6,8 @@ use std::boxed::Box;
 use crate::vector::{Point};
 use crate::player::{Player};
 use crate::object::Object;
+
+type ObjectCell = Rc<RefCell<Box<dyn Object>>>;
 
 const SPACE_CELL: Cell = Cell{color: Color { r: 0, b: 0, g: 0, a: 255 }, occupied: false};
 
@@ -99,27 +102,21 @@ pub struct Space{
     grid: CellGrid,
     cor: f64,
     // players: Vec<Rc<RefCell<dyn Object>>>,
-    // players: Vec<ObjectCell>,
-    player1: Box<dyn Object>,
-    player2: Box<dyn Object>,
+    players: Vec<ObjectCell>,
+    // player1: Box<dyn Object>,
+    // player2: Box<dyn Object>,
     pub canvas: Vec<u8>
 }
 
-// #[wasm_bindgen]
 impl Space{
     pub fn new(player1: Player, player2: Player, cor: f64) -> Space{
         let (width, height): (f64, f64) = (100.0, 100.0);
         let canvas: Vec<u8> = vec![0;width as usize * height as usize *4];
         let mut grid = CellGrid::new(width, height);
-        // let player1: ObjectCell = Rc::new(RefCell::new(Box::new(Player::new())));
-        // let player2: ObjectCell = Rc::new(RefCell::new(Box::new(Player::new())));
-        // let player1 = Box::new(Player::new(9.9,10.));
-        // let mut player2 = Box::new(Player::new(20.,10.));
-        // player2.velocity.origin = Point{x:50., y: 50.};
-        // *grid.get_mut(&player1.get_velocity().origin).unwrap() = Cell{color: player1.get_body().base_material.color, occupied: true};
-        // let mut players: Vec<Rc<RefCell<dyn Object>>> = vec![Rc::new(RefCell::new(player)), Rc::new(RefCell::new(player2))];
-        // let players = vec![player1,player2];
-        Space {size: Point{x:width, y:height}, grid, canvas, player1: Box::new(player1), player2: Box::new(player2), cor}
+        let player1: ObjectCell = Rc::new(RefCell::new(Box::new(Player::new(0., 0.))));
+        let player2: ObjectCell = Rc::new(RefCell::new(Box::new(Player::new(0., 0.))));
+        let players: Vec<ObjectCell> = vec![player1, player2];
+        Space {size: Point{x:width, y:height}, grid, canvas, players, cor}
     }
 
     fn update_canvas(&mut self){
@@ -137,6 +134,10 @@ impl Space{
                     self.canvas[index + 3] = alpha;
             }
         }
+    }
+
+    fn get_collision_pairings(&self) -> Vec<(usize, usize)>{
+        return vec![(0,1)];
     }
 
     pub fn push_canvas(&self) -> Vec<u8>{
@@ -163,67 +164,45 @@ impl Space{
     }
 
     pub fn turn(&mut self){
-        // let player1 = &self.players[0];
-        // let player2 = &self.players[1].borrow_mut();
-        let magnitude1_initial = self.player1.get_velocity().vector.magnitude;
-        let magnitude2_initial = self.player2.get_velocity().vector.magnitude;
-        let collision_time = self.player1.collide(&mut *self.player2, self.cor);
-        let t = collision_time.unwrap_or(27.);
-        //checks if the collision will happen in this tick, no collision is said to occur at 2 ticks for the purpose of by passing this check
-        // web_sys::console::log_1(&(2.0).into());
-        // web_sys::console::log_1(&t.into());
-        // web_sys::console::log_1(&(t == 2.).into());
-        // web_sys::console::log_1(&(t > 1.).into());
-        // web_sys::console::log_1(&(t <= 1.).into());
-        // println!("{},{} origin before turn", &self.player1.get_velocity().origin.x,&self.player1.get_velocity().origin.y);
-        // println!("t = {}", t);
-        if t > 1. || t < 0.{
-            // println!("cant smell no collision");
-            // web_sys::console::log_1(&"bean".into());
-            self.player1.get_velocity_mut().translate(&self.size);
-            self.player2.get_velocity_mut().translate(&self.size);
-            // println!("{},{} origin before turn", &self.player1.get_velocity().origin.x,&self.player1.get_velocity().origin.y);
-        }
-        else{
-            // println!("Collision");
-            // web_sys::console::log_1(&"log am i right".into());
-            //finds the point where the origin will be at collision
-            let mut intermediate_point_1 = self.player1.translate_pos(t);
-            let mut intermediate_point_2 = self.player1.translate_pos(t);
+        let collision_pairings = self.get_collision_pairings();
+        for (x,y) in collision_pairings{
+            let obj_1: Rc<RefCell<Box<dyn Object>>> = self.players[x].clone();
+            let obj_2 = self.players[y].clone();
+            let magnitude1_initial = obj_1.borrow().get_velocity().vector.magnitude;
+            let magnitude2_initial = obj_2.borrow().get_velocity().vector.magnitude;
+            let collision_time = obj_1.borrow_mut().collide(&mut **obj_2.borrow_mut(), self.cor);
+            let t = collision_time.unwrap_or(27.);
+            if t > 1. || t < 0.{
+                obj_1.borrow_mut().get_velocity_mut().translate(&self.size);
+                obj_2.borrow_mut().get_velocity_mut().translate(&self.size);
+            }
+            else{
+            let mut intermediate_point_1 = obj_1.borrow_mut().translate_pos(t);
+            let mut intermediate_point_2 = obj_2.borrow_mut().translate_pos(t);
             //finds the distance traveled before collision
-            let pre_collision_vector1 = self.player1.get_pos().between(&intermediate_point_1);
-            let pre_collision_vector2 = self.player2.get_pos().between(&intermediate_point_2);
+            let pre_collision_vector1 = obj_1.borrow_mut().get_pos().between(&intermediate_point_1);
+            let pre_collision_vector2 = obj_2.borrow_mut().get_pos().between(&intermediate_point_2);
             //finds the distance that still needs to be traveled
             let magnitude1 = magnitude1_initial - pre_collision_vector1.magnitude;
             let magnitude2 = magnitude2_initial - pre_collision_vector2.magnitude;
             //travels the remaining distance
             pre_collision_vector1.translate_magnitude(&mut intermediate_point_1, magnitude1);
             pre_collision_vector2.translate_magnitude(&mut intermediate_point_2, magnitude2);
+            }
+            self.grid.insert_player(&mut **obj_1.borrow_mut());
+            self.grid.insert_player(&mut **obj_2.borrow_mut());
         }
-        self.grid.insert_player(&mut *self.player1);
-        self.grid.insert_player(&mut *self.player2);
-        // println!("testing beans");
-        // let collision_time = self.player1.collide(& mut self.player2);
-        // for player in &mut self.players{
-        //     player.velocity.translate(&self.size);
-        //     self.grid.insert_player(player);
-        // }
+
     }
 
     pub fn tick(&mut self){
-        // web_sys::console::log_1(&"beans".into());
         self.turn();
         self.update_canvas();
     }
 
     pub fn accelerate(&mut self, id: i32, x: f64, y: f64){
-        // if (id as usize) < self.players.len(){
-        //     self.players[id as usize].borrow_mut().accelerate(x, y);
-        // }
-        match id {
-            0 => self.player1.accelerate(x, y),
-            1 => self.player2.accelerate(x, y),
-            _ => ()
+        if (id as usize) < self.players.len(){
+            self.players[id as usize].borrow_mut().accelerate(x, y);
         }
     }
 }
