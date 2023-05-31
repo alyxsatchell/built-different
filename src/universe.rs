@@ -1,11 +1,11 @@
 use crate::player::Player;
 use crate::space::{Space};
-use crate::vector::{Point};
+use crate::vector::{Point, Vector};
 use crate::velocity::{Velocity};
 use crate::object::Object;
 
 use std::sync::mpsc::{self, Sender, Receiver};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 use std::{io};
 
@@ -58,14 +58,18 @@ impl Input{
 }
 
 struct InputWorker{
-    tx_space: Sender<msg>,
     handle: JoinHandle<()>,
 }
 
 impl InputWorker{
     fn new(tx_space: Sender<msg>) -> InputWorker{
-        let handle = thread::spawn(|| {});
-        InputWorker { tx_space, handle}
+        let handle = thread::spawn(move || {
+            let test_closure = Arc::new(|obj: &mut dyn Object, x: f64| {
+                obj.accelerate_force(Vector::new(x, 0.))
+            });
+            tx_space.send((0 as usize, test_closure, 1.)).expect("failed to send command");
+        });
+        InputWorker { handle}
     }
 }
 
