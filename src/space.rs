@@ -1,10 +1,12 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::boxed::Box;
+use std::sync::mpsc::Receiver;
 
 use crate::vector::{Point};
 use crate::player::{Player};
 use crate::object::Object;
+use crate::universe::{msg};
 
 type ObjectCell = Rc<RefCell<Box<dyn Object>>>;
 
@@ -101,18 +103,19 @@ pub struct Space{
     grid: CellGrid,
     cor: f64,
     players: Vec<ObjectCell>,
-    pub canvas: Vec<u8>
+    pub canvas: Vec<u8>,
+    rx: Receiver<(usize, Box<dyn Fn(i32) -> i32>, f64)>
 }
 
 impl Space{
-    pub fn new(player1: Player, player2: Player, cor: f64) -> Space{
+    pub fn new(player1: Player, player2: Player, cor: f64, rx: Receiver<msg>) -> Space{
         let (width, height): (f64, f64) = (100.0, 100.0);
         let canvas: Vec<u8> = vec![0;width as usize * height as usize *4];
         let grid = CellGrid::new(width, height);
         let player1: ObjectCell = Rc::new(RefCell::new(Box::new(player1)));
         let player2: ObjectCell = Rc::new(RefCell::new(Box::new(player2)));
         let players: Vec<ObjectCell> = vec![player1, player2];
-        Space {size: Point{x:width, y:height}, grid, canvas, players, cor}
+        Space {size: Point{x:width, y:height}, grid, canvas, players, cor, rx}
     }
 
     fn update_canvas(&mut self){

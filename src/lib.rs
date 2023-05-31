@@ -5,6 +5,7 @@ pub mod velocity;
 pub mod material;
 pub mod object;
 pub mod physics;
+pub mod universe;
 
 #[cfg(test)]
 mod tests {
