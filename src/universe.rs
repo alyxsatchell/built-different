@@ -9,6 +9,9 @@ use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 use std::{io};
 
+const BROWSERS: &'static [&'static str] = &["firefox", "chrome"];
+const COMMAND_LIST: &'static [&'static str; 4] = &["w", "s", "a", "d"];
+
 pub type msg = (usize, Arc<dyn Fn(&mut dyn Object) -> () + Send + Sync>, f64); //the type of data that is sent for messages
 //the closure will be the command that is to be executed on the object at the given usize in the array and the f64 will be the parameter for the closure
 
@@ -64,25 +67,27 @@ pub struct InputWorker{
 impl InputWorker{
     fn new(tx_space: Sender<msg>) -> InputWorker{
         let handle = thread::spawn(move || {
-        let cmd = 1;
-        let id = 0 as usize;
-        let x = 1.;
-        match cmd{
-            1 => {
-                let closure = Arc::new(move |obj: &mut dyn Object| {
-                    obj.accelerate(x, 0.)
-                });
-                tx_space.send((id, closure,x)).expect("command failed");
-                println!("sent")
-            },
-            2 => {
-                let closure = Arc::new( move|obj: &mut dyn Object| {
-                    obj.accelerate(0., x)
-                });
-                tx_space.send((id, closure,x)).expect("command failed");
-            },
-            _ => {()}
-        };
+        // let (id, cmd, x) = get_input();
+        let input = get_input();
+        if input.is_some(){
+            let (id, cmd, x) = input.unwrap();
+            match cmd{
+                1 => {
+                    let closure = Arc::new(move |obj: &mut dyn Object| {
+                        obj.accelerate(x, 0.)
+                    });
+                    tx_space.send((id, closure,x)).expect("command failed");
+                    println!("sent")
+                },
+                2 => {
+                    let closure = Arc::new( move|obj: &mut dyn Object| {
+                        obj.accelerate(0., x)
+                    });
+                    tx_space.send((id, closure,x)).expect("command failed");
+                },
+                _ => {()}
+            };
+        }
         });
         InputWorker { handle}
     }
@@ -100,10 +105,8 @@ impl SpaceWorker{
                 //checks if a command has been issued and runs it on the object
                 match space.rx.try_recv(){
                     Ok(t) => {
-                        println!("beans");
                         let (id, f, _) = t;
                         f(&mut **space.players[id].lock().unwrap());
-                        println!("Space {}", *space.players[id].lock().unwrap().get_velocity());
                     },
                     Err(_) => (),
                 }
@@ -124,7 +127,6 @@ impl Universe{
     pub fn new() -> Universe{
         let (tx_space, rx_space) = mpsc::channel(); //sends the input data to space
         let input_worker = InputWorker::new(tx_space);
-        println!("yeah");
         let space_worker = SpaceWorker::new(rx_space);
         Universe { space_worker, input_worker }
     }
@@ -136,4 +138,22 @@ fn set_up(rx: Receiver<msg>) -> Box<Space>{
     let player1 = Player::create(Velocity::new(Point { x: 10., y: 10. }, 0., 0.));
     let player2 = Player::create(Velocity::new(Point { x: 20., y: 10. }, 0., 0.));
     Box::new(Space::new(player1, player2, cor, rx))
+}
+
+fn read_input() -> (&'static str, usize){
+    return ("d1", 0);
+}
+
+fn parse_input(input: (&str, usize)) -> (usize, &str, f64){
+    //TODO: get commands separated from parameters
+    return (0, "d", 1.);
+}
+
+fn get_input() -> Option<(usize, usize, f64)>{
+    let (id, cmd, x) = parse_input(read_input());
+    let cmd_result = COMMAND_LIST.binary_search(&cmd);
+    match cmd_result{
+        Ok(t) => Some((id, t, x)),
+        Err(_) => None
+    }
 }
