@@ -22,7 +22,7 @@ impl Player {
         return player
     }
 
-    pub fn create(velocity: Velocity, mass: f64) -> Player{
+    pub fn create(velocity: Velocity) -> Player{
         let body = Body::null_body();
         let mut player = Player {body, velocity};
         player.make_body(2.);

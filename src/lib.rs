@@ -13,6 +13,7 @@ mod tests {
     use crate::player::Player;
     use crate::vector::{Point, Vector};
     use crate::{physics};
+    use crate::universe::Universe;
 
     #[test]
     fn test_quadratic() {
@@ -100,6 +101,12 @@ mod tests {
         println!("{}", player.get_velocity().vector.x);
         assert!(player.get_velocity().vector.x == 1./32.);
         assert!(player.get_velocity().vector.y == 0.);
+    }
+
+    #[test]
+    fn universe_create(){
+        let uni = Universe::new();
+        uni.space_worker.handle.join();
     }
 
     // #[test]

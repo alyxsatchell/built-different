@@ -9,7 +9,7 @@ use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 use std::{io};
 
-pub type msg = (usize, Arc<dyn Fn(&mut dyn Object, f64) -> () + Send + Sync>, f64); //the type of data that is sent for messages
+pub type msg = (usize, Arc<dyn Fn(&mut dyn Object) -> () + Send + Sync>, f64); //the type of data that is sent for messages
 //the closure will be the command that is to be executed on the object at the given usize in the array and the f64 will be the parameter for the closure
 
 pub struct Input{
@@ -57,41 +57,55 @@ impl Input{
     }
 }
 
-struct InputWorker{
+pub struct InputWorker{
     handle: JoinHandle<()>,
 }
 
 impl InputWorker{
     fn new(tx_space: Sender<msg>) -> InputWorker{
         let handle = thread::spawn(move || {
-            let test_closure = Arc::new(|obj: &mut dyn Object, x: f64| {
-                obj.accelerate_force(Vector::new(x, 0.))
-            });
-            tx_space.send((0 as usize, test_closure, 1.)).expect("failed to send command");
+        let cmd = 1;
+        let id = 0 as usize;
+        let x = 1.;
+        match cmd{
+            1 => {
+                let closure = Arc::new(move |obj: &mut dyn Object| {
+                    obj.accelerate(x, 0.)
+                });
+                tx_space.send((id, closure,x)).expect("command failed");
+                println!("sent")
+            },
+            2 => {
+                let closure = Arc::new( move|obj: &mut dyn Object| {
+                    obj.accelerate(0., x)
+                });
+                tx_space.send((id, closure,x)).expect("command failed");
+            },
+            _ => {()}
+        };
         });
         InputWorker { handle}
     }
 }
 
-struct SpaceWorker{
-    handle: JoinHandle<()>,
+pub struct SpaceWorker{
+    pub handle: JoinHandle<()>,
 }
 
 impl SpaceWorker{
     fn new(rx_space: Receiver<msg>) -> SpaceWorker{
-
         let handle = thread::spawn(move || {
             let mut space = set_up(rx_space);
-            for i in 0..10{
-                {
-                    //checks if a command has been issued and runs it on the object
-                    match space.rx.try_recv(){
-                        Ok(t) => {
-                            let (id, f, x) = t;
-                            f(&mut **space.players[id].lock().unwrap(), x)
-                        },
-                        Err(_) => todo!(),
-                    }
+            for _ in 0..10{
+                //checks if a command has been issued and runs it on the object
+                match space.rx.try_recv(){
+                    Ok(t) => {
+                        println!("beans");
+                        let (id, f, _) = t;
+                        f(&mut **space.players[id].lock().unwrap());
+                        println!("Space {}", *space.players[id].lock().unwrap().get_velocity());
+                    },
+                    Err(_) => (),
                 }
                 space.tick();
             }
@@ -102,22 +116,24 @@ impl SpaceWorker{
 
 
 pub struct Universe{
-    space_worker: SpaceWorker,
-    input_worker: InputWorker,
+    pub space_worker: SpaceWorker,
+    pub input_worker: InputWorker,
 }
 
 impl Universe{
     pub fn new() -> Universe{
         let (tx_space, rx_space) = mpsc::channel(); //sends the input data to space
-        let space_worker = SpaceWorker::new(rx_space);
         let input_worker = InputWorker::new(tx_space);
+        println!("yeah");
+        let space_worker = SpaceWorker::new(rx_space);
         Universe { space_worker, input_worker }
     }
 }
 
 fn set_up(rx: Receiver<msg>) -> Box<Space>{
-    let input = Input::new();
-    let player1 = Player::create(input.v1, input.mass1);
-    let player2 = Player::create(input.v2, input.mass2);
-    Box::new(Space::new(player1, player2, input.cor, rx))
+    // let input = Input::new();
+    let cor = 1.;
+    let player1 = Player::create(Velocity::new(Point { x: 10., y: 10. }, 0., 0.));
+    let player2 = Player::create(Velocity::new(Point { x: 20., y: 10. }, 0., 0.));
+    Box::new(Space::new(player1, player2, cor, rx))
 }
