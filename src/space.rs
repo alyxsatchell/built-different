@@ -103,9 +103,9 @@ pub struct Space{
     size: Point,
     grid: CellGrid,
     cor: f64,
-    players: Vec<ObjectCell>,
+    pub players: Vec<ObjectCell>,
     pub canvas: Vec<u8>,
-    rx: Receiver<msg>
+    pub rx: Receiver<msg>
 }
 
 impl Space{

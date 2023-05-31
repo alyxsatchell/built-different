@@ -2,14 +2,15 @@ use crate::player::Player;
 use crate::space::{Space};
 use crate::vector::{Point};
 use crate::velocity::{Velocity};
+use crate::object::Object;
 
 use std::sync::mpsc::{self, Sender, Receiver};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 use std::{io};
 
-//Box<dyn Fn(i32) -> i32>
-pub type msg = (usize, Arc<dyn Fn(i32) -> i32 + Send + Sync>, f64);
+pub type msg = (usize, Arc<dyn Fn(&mut dyn Object, f64) -> () + Send + Sync>, f64); //the type of data that is sent for messages
+//the closure will be the command that is to be executed on the object at the given usize in the array and the f64 will be the parameter for the closure
 
 pub struct Input{
     mass1: f64,
@@ -78,6 +79,16 @@ impl SpaceWorker{
         let handle = thread::spawn(move || {
             let mut space = set_up(rx_space);
             for i in 0..10{
+                {
+                    //checks if a command has been issued and runs it on the object
+                    match space.rx.try_recv(){
+                        Ok(t) => {
+                            let (id, f, x) = t;
+                            f(&mut **space.players[id].lock().unwrap(), x)
+                        },
+                        Err(_) => todo!(),
+                    }
+                }
                 space.tick();
             }
         });
