@@ -4,10 +4,12 @@ use crate::vector::{Point};
 use crate::velocity::{Velocity};
 
 use std::sync::mpsc::{self, Sender, Receiver};
+use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 use std::{io};
 
-pub type msg = (usize, Box<dyn Fn(i32) -> i32>, f64);
+//Box<dyn Fn(i32) -> i32>
+pub type msg = (usize, Arc<dyn Fn(i32) -> i32 + Send + Sync>, f64);
 
 pub struct Input{
     mass1: f64,
@@ -72,8 +74,9 @@ struct SpaceWorker{
 
 impl SpaceWorker{
     fn new(rx_space: Receiver<msg>) -> SpaceWorker{
-        let mut space = set_up(rx_space);
+
         let handle = thread::spawn(move || {
+            let mut space = set_up(rx_space);
             for i in 0..10{
                 space.tick();
             }
