@@ -105,8 +105,7 @@ mod tests {
 
     #[test]
     fn universe_create(){
-        let uni = Universe::new();
-        uni.space_worker.handle.join();
+        let _ = Universe::new();
     }
 
 
@@ -121,6 +120,12 @@ mod tests {
         println!("Enter Input 'w 1': ");
         let input = get_input().unwrap();
         assert!(input == (0,0,1.));
+    }
+
+    #[test]
+    fn universe_run(){
+        let mut uni = Universe::new();
+        uni.run();
     }
     // #[test]
     // fn test_run(){

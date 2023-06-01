@@ -1,13 +1,14 @@
 use crate::player::Player;
 use crate::space::{Space};
-use crate::vector::{Point, Vector};
+use crate::vector::{Point};
 use crate::velocity::{Velocity};
 use crate::object::Object;
 
 use std::sync::mpsc::{self, Sender, Receiver};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc};
 use std::thread::{self, JoinHandle};
 use std::{io};
+use std::mem::swap;
 
 const COMMAND_LIST: &'static [&'static str] = &["w", "s", "a", "d"];
 
@@ -60,44 +61,69 @@ impl Input{
 }
 
 pub struct InputWorker{
-    handle: JoinHandle<()>,
+    handle: Option<JoinHandle<()>>,
+    sender: Option<Sender<msg>>,
+    dormant: bool
 }
 
 impl InputWorker{
     fn new(tx_space: Sender<msg>) -> InputWorker{
-        let handle = thread::spawn(move || {
-        let mut string = String::new();
-        let input = get_input();
-        if input.is_some(){
-            let (id, cmd, x) = input.unwrap();
-            match cmd{
-                1 => {
-                    let closure = Arc::new(move |obj: &mut dyn Object| {
-                        obj.accelerate(x, 0.)
-                    });
-                    tx_space.send((id, closure,x)).expect("command failed");
-                },
-                2 => {
-                    let closure = Arc::new( move|obj: &mut dyn Object| {
-                        obj.accelerate(0., x)
-                    });
-                    tx_space.send((id, closure,x)).expect("command failed");
-                },
-                _ => {()}
-            };
-        }
-        });
-        InputWorker { handle}
+        let handle = None;
+        let dormant = true;
+        let sender = Some(tx_space);
+        InputWorker { handle, sender, dormant}
+    }
+
+    fn start(&mut self){
+        let mut sender = None;
+        swap(&mut sender, &mut self.sender);
+        self.dormant = false;
+        let mut handle = Some(thread::spawn(move || {
+            let tx_space = sender.unwrap();
+            let input = get_input();
+            if input.is_some(){
+                let (id, cmd, x) = input.unwrap();
+                match cmd{
+                    1 => {
+                        let closure = Arc::new(move |obj: &mut dyn Object| {
+                            obj.accelerate(x, 0.)
+                        });
+                        tx_space.send((id, closure,x)).expect("command failed");
+                    },
+                    2 => {
+                        let closure = Arc::new( move|obj: &mut dyn Object| {
+                            obj.accelerate(0., x)
+                        });
+                        tx_space.send((id, closure,x)).expect("command failed");
+                    },
+                    _ => {()}
+                };
+            }
+            }));
+        swap(&mut handle, &mut self.handle);
     }
 }
 
 pub struct SpaceWorker{
-    pub handle: JoinHandle<()>,
+    pub handle: Option<JoinHandle<()>>,
+    receiver: Option<Receiver<msg>>,
+    dormant: bool
 }
 
 impl SpaceWorker{
     fn new(rx_space: Receiver<msg>) -> SpaceWorker{
+        let handle = None;
+        let receiver = Some(rx_space);
+        let dormant = false;
+        SpaceWorker {handle, receiver, dormant}
+    }
+
+    fn start(&mut self){
+        let mut receiver = None;
+        swap(&mut receiver, &mut self.receiver);
+        self.dormant = false;
         let handle = thread::spawn(move || {
+            let rx_space = receiver.unwrap();
             let mut space = set_up(rx_space);
             for _ in 0..10{
                 //checks if a command has been issued and runs it on the object
@@ -111,7 +137,7 @@ impl SpaceWorker{
                 space.tick();
             }
         });
-        SpaceWorker {handle}
+        swap(&mut Some(handle), &mut self.handle);
     }
 }
 
@@ -127,6 +153,18 @@ impl Universe{
         let input_worker = InputWorker::new(tx_space);
         let space_worker = SpaceWorker::new(rx_space);
         Universe { space_worker, input_worker }
+    }
+
+    fn start(&mut self){
+        self.space_worker.start();
+        self.input_worker.start();
+    }
+
+    pub fn run(&mut self){
+        self.start();
+        let mut handle: Option<JoinHandle<()>> = None;
+        swap(&mut handle, &mut self.space_worker.handle);
+        handle.unwrap().join().expect("join failed");
     }
 }
 
