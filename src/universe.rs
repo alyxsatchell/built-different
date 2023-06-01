@@ -9,8 +9,7 @@ use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 use std::{io};
 
-const BROWSERS: &'static [&'static str] = &["firefox", "chrome"];
-const COMMAND_LIST: &'static [&'static str; 4] = &["w", "s", "a", "d"];
+const COMMAND_LIST: &'static [&'static str] = &["w", "s", "a", "d"];
 
 pub type msg = (usize, Arc<dyn Fn(&mut dyn Object) -> () + Send + Sync>, f64); //the type of data that is sent for messages
 //the closure will be the command that is to be executed on the object at the given usize in the array and the f64 will be the parameter for the closure
@@ -67,7 +66,7 @@ pub struct InputWorker{
 impl InputWorker{
     fn new(tx_space: Sender<msg>) -> InputWorker{
         let handle = thread::spawn(move || {
-        // let (id, cmd, x) = get_input();
+        let mut string = String::new();
         let input = get_input();
         if input.is_some(){
             let (id, cmd, x) = input.unwrap();
@@ -77,7 +76,6 @@ impl InputWorker{
                         obj.accelerate(x, 0.)
                     });
                     tx_space.send((id, closure,x)).expect("command failed");
-                    println!("sent")
                 },
                 2 => {
                     let closure = Arc::new( move|obj: &mut dyn Object| {
@@ -140,20 +138,38 @@ fn set_up(rx: Receiver<msg>) -> Box<Space>{
     Box::new(Space::new(player1, player2, cor, rx))
 }
 
-fn read_input() -> (&'static str, usize){
-    return ("d1", 0);
+fn read_input() -> (String, usize){
+    let mut string = String::new();
+    Input::get_input(&mut string, "");
+    let id = 0;
+    return (string, id);
 }
 
-fn parse_input(input: (&str, usize)) -> (usize, &str, f64){
-    //TODO: get commands separated from parameters
-    return (0, "d", 1.);
-}
-
-fn get_input() -> Option<(usize, usize, f64)>{
-    let (id, cmd, x) = parse_input(read_input());
-    let cmd_result = COMMAND_LIST.binary_search(&cmd);
-    match cmd_result{
-        Ok(t) => Some((id, t, x)),
-        Err(_) => None
+pub fn parse_input(input: (String, usize)) -> Option<(usize, usize, f64)>{
+    let (string, id) = input;
+    let components: Vec<&str>= string.split(" ").collect();
+    let cmd = components[0];
+    let parameter = components[1].trim_end().parse::<f64>();
+    if parameter.is_err(){
+        return None
     }
+    let mut index = usize::MAX;
+    for i in 0..COMMAND_LIST.len(){
+        if COMMAND_LIST[i] == cmd{
+            index = i;
+            break;
+        }
+    }
+    if index == usize::MAX{
+        return None
+    }
+    return Some((id, index, parameter.unwrap()));
+}
+
+pub fn get_input() -> Option<(usize, usize, f64)>{
+    let input = parse_input(read_input());
+    if input.is_none(){
+        return None
+    }
+    Some(input.unwrap())
 }

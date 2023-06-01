@@ -13,7 +13,7 @@ mod tests {
     use crate::player::Player;
     use crate::vector::{Point, Vector};
     use crate::{physics};
-    use crate::universe::Universe;
+    use crate::universe::{Universe, parse_input, get_input};
 
     #[test]
     fn test_quadratic() {
@@ -109,6 +109,19 @@ mod tests {
         uni.space_worker.handle.join();
     }
 
+
+    #[test]
+    fn test_parse_input(){
+        let parsed_input = parse_input(("w 1".to_string(), 0));
+        assert!(parsed_input == Some((0, 0, 1.)));
+    }
+
+    #[test]
+    fn test_get_input(){
+        println!("Enter Input 'w 1': ");
+        let input = get_input().unwrap();
+        assert!(input == (0,0,1.));
+    }
     // #[test]
     // fn test_run(){
     //     let mut space: Box<Space> = Box::new(set_up());
