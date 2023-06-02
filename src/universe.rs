@@ -80,26 +80,39 @@ impl InputWorker{
         self.dormant = false;
         let mut handle = Some(thread::spawn(move || {
             let tx_space = sender.unwrap();
-            let input = get_input();
-            if input.is_some(){
-                let (id, cmd, x) = input.unwrap();
-                match cmd{
-                    1 => {
-                        let closure = Arc::new(move |obj: &mut dyn Object| {
-                            obj.accelerate(x, 0.)
-                        });
-                        tx_space.send((id, closure,x)).expect("command failed");
-                    },
-                    2 => {
-                        let closure = Arc::new( move|obj: &mut dyn Object| {
-                            obj.accelerate(0., x)
-                        });
-                        tx_space.send((id, closure,x)).expect("command failed");
-                    },
-                    _ => {()}
-                };
+            loop{
+                let input = get_input();
+                if input.is_some(){
+                    let (id, cmd, x) = input.unwrap();
+                    println!("id: {}, cmd: {}, x: {}", id, cmd, x);
+                    match cmd{
+                        0 => {
+                                             let closure = Arc::new(move |obj: &mut dyn Object| {
+                                obj.accelerate(x, 0.);
+                                println!("{}", &obj.get_velocity().vector);
+                            });
+                            println!("sent");
+                            tx_space.send((id, closure,x)).expect("command failed");           
+                        }
+                        1 => {
+                            let closure = Arc::new(move |obj: &mut dyn Object| {
+                                obj.accelerate(x, 0.);
+                                println!("{}", &obj.get_velocity().vector);
+                            });
+                            println!("sent");
+                            tx_space.send((id, closure,x)).expect("command failed");
+                        },
+                        2 => {
+                            let closure = Arc::new( move|obj: &mut dyn Object| {
+                                obj.accelerate(0., x)
+                            });
+                            tx_space.send((id, closure,x)).expect("command failed");
+                        },
+                        _ => {()}
+                    };
+                }
             }
-            }));
+        }));
         swap(&mut handle, &mut self.handle);
     }
 }
@@ -125,12 +138,13 @@ impl SpaceWorker{
         let handle = thread::spawn(move || {
             let rx_space = receiver.unwrap();
             let mut space = set_up(rx_space);
-            for _ in 0..10{
+            loop{
                 //checks if a command has been issued and runs it on the object
                 match space.rx.try_recv(){
                     Ok(t) => {
                         let (id, f, _) = t;
                         f(&mut **space.players[id].lock().unwrap());
+                        println!("received");
                     },
                     Err(_) => (),
                 }
@@ -155,7 +169,7 @@ impl Universe{
         Universe { space_worker, input_worker }
     }
 
-    fn start(&mut self){
+    pub fn start(&mut self){
         self.space_worker.start();
         self.input_worker.start();
     }
@@ -169,10 +183,9 @@ impl Universe{
 }
 
 fn set_up(rx: Receiver<msg>) -> Box<Space>{
-    // let input = Input::new();
     let cor = 1.;
     let player1 = Player::create(Velocity::new(Point { x: 10., y: 10. }, 0., 0.));
-    let player2 = Player::create(Velocity::new(Point { x: 20., y: 10. }, 0., 0.));
+    let player2 = Player::create(Velocity::new(Point { x: 20., y: 20. }, 0., 0.));
     Box::new(Space::new(player1, player2, cor, rx))
 }
 
