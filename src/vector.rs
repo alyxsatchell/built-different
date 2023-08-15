@@ -3,7 +3,7 @@ use std::ops::{Index, IndexMut, Add, Sub, AddAssign, Mul, MulAssign};
 use std::cmp::{PartialEq,Eq};
 use std::fmt;
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Point{
     pub x: f64,
     pub y: f64
@@ -23,6 +23,18 @@ impl Point{
         Vector { x, y, magnitude: Vector::magnitude(x, y)}
     }
 
+}
+
+impl From<constellation::canvas::Point> for Point{
+    fn from(value: constellation::canvas::Point) -> Self {
+        return Point{x: value.x as f64, y: value.y as f64}
+    }
+}
+
+impl From<Point> for constellation::canvas::Point{
+    fn from(value: Point) -> Self {
+        return constellation::canvas::Point{x: value.x as i32, y: value.y as i32}
+    }
 }
 
 impl PartialEq for Point{
@@ -208,5 +220,11 @@ impl MulAssign<f64> for Vector{
 impl fmt::Display for Vector{
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({},{})", self.x, self.y)
+    }
+}
+
+impl From<Vector> for constellation::canvas::Point{
+    fn from(value: Vector) -> Self {
+        constellation::canvas::Point{x: value.x as i32, y: value.y as i32}
     }
 }

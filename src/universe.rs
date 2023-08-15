@@ -1,13 +1,14 @@
 use crate::player::Player;
-use crate::space::{Space};
-use crate::vector::{Point};
-use crate::velocity::{Velocity};
+use crate::space::Space;
+use crate::vector::Point;
+use crate::velocity::Velocity;
 use crate::object::Object;
 
+use core::time;
 use std::sync::mpsc::{self, Sender, Receiver};
-use std::sync::{Arc};
-use std::thread::{self, JoinHandle};
-use std::{io};
+use std::sync::Arc;
+use std::thread::{self, JoinHandle, sleep};
+use std::io;
 use std::mem::swap;
 
 const COMMAND_LIST: &'static [&'static str] = &["w", "s", "a", "d"];
@@ -149,6 +150,7 @@ impl SpaceWorker{
                     Err(_) => (),
                 }
                 space.tick();
+                sleep(time::Duration::from_millis(100));
             }
         });
         swap(&mut Some(handle), &mut self.handle);
@@ -184,9 +186,11 @@ impl Universe{
 
 fn set_up(rx: Receiver<msg>) -> Box<Space>{
     let cor = 1.;
-    let player1 = Player::create(Velocity::new(Point { x: 10., y: 10. }, 0., 0.));
+    let player1 = Player::create(Velocity::new(Point { x: 10., y: 10. }, 1., 0.));
     let player2 = Player::create(Velocity::new(Point { x: 20., y: 20. }, 0., 0.));
-    Box::new(Space::new(player1, player2, cor, rx))
+    let mut space = Space::new(player1, player2, cor, rx);
+    space.update_canvas();
+    Box::new(space)
 }
 
 fn read_input() -> (String, usize){

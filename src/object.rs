@@ -1,4 +1,8 @@
+use constellation::{stencil::{Stencil, StencilMap}, canvas::Tile};
+
 use crate::{vector::{Point, Vector}, velocity::Velocity, material::Material};
+
+use std::collections::HashMap;
 
 pub trait Object{
 
@@ -31,8 +35,19 @@ pub trait Object{
     fn get_edge_material(&self, n: &Vector) -> Material;
 }
 
+impl Stencil for dyn Object{
+    fn get_map(&self) -> &constellation::stencil::StencilMap {
+        &self.get_body().stencilmap
+    }
+
+    fn get_map_mut(&mut self) -> &mut constellation::stencil::StencilMap {
+        &mut self.get_body_mut().stencilmap
+    }
+}
+
 pub struct Body{
     pub grid: Vec<(Point,Material)>,
+    pub stencilmap: StencilMap,
     pub size: f64,
     pub base_material: Material,
     pub mass: f64,
@@ -40,10 +55,18 @@ pub struct Body{
 
 impl Body{
     pub fn new(size: f64, grid: Vec<(Point, Material)>, base_material: Material, mass: f64) -> Body{
-        Body{mass, size, grid, base_material}
+        let mut new_grid = Vec::new();
+        let mut stencilmap_map: HashMap<constellation::canvas::Point, Tile> = HashMap::new();
+        for (point, material) in grid{
+            let tile = Tile::new(material.color.into());
+            stencilmap_map.insert(point.into(), tile);
+            new_grid.push((point, material));
+        }
+        let stencilmap = StencilMap::new(constellation::canvas::Point{x:0,y:0}, stencilmap_map);
+        Body{mass, size, grid: new_grid, base_material, stencilmap}
     }
 
     pub fn null_body() -> Body{
-        Body { mass: 0., grid: Vec::new(), size: 0., base_material: Material::null_material() }
+        Body { mass: 0., grid: Vec::new(), size: 0., base_material: Material::null_material(), stencilmap: StencilMap { origin: constellation::canvas::Point{x:0,y:0}, addition_map: HashMap::new(), subtraction_map: Vec::new(), current_map: HashMap::new() }}
     }
 }
