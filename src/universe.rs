@@ -187,7 +187,7 @@ impl Universe{
 fn set_up(rx: Receiver<msg>) -> Box<Space>{
     let cor = 1.;
     let player1 = Player::create(Velocity::new(Point { x: 10., y: 10. }, 1., 0.));
-    let player2 = Player::create(Velocity::new(Point { x: 20., y: 20. }, 0., 0.));
+    let player2 = Player::create(Velocity::new(Point { x: 20., y: 10. }, 0., 0.));
     let mut space = Space::new(player1, player2, cor, rx);
     space.update_canvas();
     Box::new(space)

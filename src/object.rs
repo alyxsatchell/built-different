@@ -35,15 +35,15 @@ pub trait Object{
     fn get_edge_material(&self, n: &Vector) -> Material;
 }
 
-impl Stencil for dyn Object{
-    fn get_map(&self) -> &constellation::stencil::StencilMap {
-        &self.get_body().stencilmap
-    }
+// impl Stencil for dyn Object{
+//     fn get_map(&self) -> &constellation::stencil::StencilMap {
+//         &self.get_body().stencilmap
+//     }
 
-    fn get_map_mut(&mut self) -> &mut constellation::stencil::StencilMap {
-        &mut self.get_body_mut().stencilmap
-    }
-}
+//     fn get_map_mut(&mut self) -> &mut constellation::stencil::StencilMap {
+//         &mut self.get_body_mut().stencilmap
+//     }
+// }
 
 pub struct Body{
     pub grid: Vec<(Point,Material)>,
@@ -67,6 +67,16 @@ impl Body{
     }
 
     pub fn null_body() -> Body{
-        Body { mass: 0., grid: Vec::new(), size: 0., base_material: Material::null_material(), stencilmap: StencilMap { origin: constellation::canvas::Point{x:0,y:0}, addition_map: HashMap::new(), subtraction_map: Vec::new(), current_map: HashMap::new() }}
+        Body { mass: 0., grid: Vec::new(), size: 0., base_material: Material::null_material(), stencilmap: StencilMap { origin: constellation::canvas::Point{x:0,y:0}, addition_map: HashMap::new(), subtraction_map: HashMap::new(), current_map: HashMap::new() }}
+    }
+}
+
+impl Stencil for Body{
+    fn get_map(&self) -> &StencilMap {
+        &self.stencilmap
+    }
+
+    fn get_map_mut(&mut self) -> &mut StencilMap {
+        &mut self.stencilmap
     }
 }

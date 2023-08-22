@@ -1,5 +1,5 @@
 use std::boxed::Box;
-use std::sync::Mutex;
+use std::sync::{Mutex, Arc};
 use std::sync::mpsc::Receiver;
 
 use constellation::canvas::Canvas;
@@ -9,7 +9,7 @@ use crate::player::Player;
 use crate::object::Object;
 use crate::universe::msg;
 
-type ObjectCell = Mutex<Box<dyn Object>>;
+type ObjectCell = Arc<Mutex<Box<dyn Object>>>;
 
 #[derive(PartialEq, Eq)]
 #[derive(Clone, Copy)]
@@ -56,22 +56,19 @@ pub struct Space{
 impl Space{
     pub fn new(player1: Player, player2: Player, cor: f64, rx: Receiver<msg>) -> Space{
         let canvas: Canvas = Canvas::new((1,1), (50,30), constellation::canvas::Color::new(0,0,0,true));
-        let player1: ObjectCell = Mutex::new(Box::new(player1));
-        let player2: ObjectCell = Mutex::new(Box::new(player2));
+        let player1: ObjectCell = Arc::new(Mutex::new(Box::new(player1)));
+        let player2: ObjectCell = Arc::new(Mutex::new(Box::new(player2)));
         let players: Vec<ObjectCell> = vec![player1, player2];
         Space {canvas, players, cor, rx}
     }
 
     pub fn update_canvas(&mut self){
-        for object in &self.players{
-            let object = object.lock().unwrap();
-            let stencilmap = object.get_map();
-            constellation::debug_logger::debug_log(&format!("{:?}", stencilmap));
-            self.canvas.update(stencilmap);
+        for object in &mut self.players{
+            self.canvas.update(object.lock().unwrap().get_body_mut().get_map_mut());
         }
     }
 
-    fn draw(&self){
+    fn draw(&mut self){
         self.canvas.draw();
     }
 
@@ -99,8 +96,8 @@ impl Space{
                 let vec2 = obj_2.get_velocity_mut();
                 vec2.translate(&self.canvas.size.into());
                 let p2 = constellation::canvas::Point{x: vec2.vector.x as i32, y: vec2.vector.y as i32};
-                obj_1.get_map_mut().translate(p1);
-                obj_2.get_map_mut().translate(p2);
+                obj_1.get_body_mut().get_map_mut().translate(p1);
+                obj_2.get_body_mut().get_map_mut().translate(p2);
             }
             else{
                 let mut intermediate_point_1 = obj_1.translate_pos(t);
@@ -116,8 +113,8 @@ impl Space{
                 pre_collision_vector2.translate_magnitude(&mut intermediate_point_2, magnitude2);
                 let translation_1: constellation::canvas::Point = obj_1_pos.between(&obj_1.get_pos()).into();
                 let translation_2: constellation::canvas::Point = obj_2_pos.between(&obj_2.get_pos()).into();
-                obj_1.get_map_mut().translate(translation_1);
-                obj_2.get_map_mut().translate(translation_2);
+                obj_1.get_body_mut().get_map_mut().translate(translation_1);
+                obj_2.get_body_mut().get_map_mut().translate(translation_2);
             }
         }
 
