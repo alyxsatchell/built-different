@@ -1,16 +1,16 @@
 use std::boxed::Box;
-use std::sync::Mutex;
+use std::sync::{Mutex, Arc};
 use std::sync::mpsc::Receiver;
 
-use crate::vector::{Point};
-use crate::player::{Player};
+use constellation::canvas::Canvas;
+use constellation::debug_logger::debug_log;
+use constellation::stencil::Stencil;
+
+use crate::player::Player;
 use crate::object::Object;
-use crate::universe::{msg};
+use crate::universe::msg;
 
-type ObjectCell = Mutex<Box<dyn Object>>;
-
-const SPACE_CELL: Cell = Cell{color: Color { r: 0, b: 0, g: 0, a: 255 }, occupied: false};
-
+type ObjectCell = Arc<Mutex<Box<dyn Object>>>;
 
 #[derive(PartialEq, Eq)]
 #[derive(Clone, Copy)]
@@ -34,131 +34,47 @@ impl Color{
         return (self.r, self.g, self.b, self.a)
     }
 }
-#[derive(PartialEq, Eq)]
-#[derive(Clone)]
-pub struct Cell{
-    color: Color,
-    occupied: bool
+
+impl From<Color> for constellation::canvas::Color{
+    fn from(value: Color) -> Self {
+        return constellation::canvas::Color::new(value.r, value.g, value.b, true)
+    }
 }
 
-pub struct CellGrid{
-    grid: Vec<Vec<Cell>>,
-}
-
-impl CellGrid{
-    pub fn new(width: f64, height: f64) -> CellGrid{
-        let mut grid = Vec::new();
-        for h in 0..height as i32{
-            grid.push(Vec::new());
-            for _ in 0..width as i32{
-                grid[h as usize].push(SPACE_CELL.clone());
-            }
-        }
-        CellGrid { grid}
+impl From<constellation::canvas::Color> for Color{
+    fn from(value: constellation::canvas::Color) -> Self {
+        return Color::new(value.r, value.g, value.b, 255);
     }
-
-    pub fn get(&self, p: Point) -> Option<&Cell>{
-        if p.y < 0.0 || p.y >= self.grid.len() as f64{
-            return None
-        }
-        if p.x < 0.0 || p.x >= self.grid[p.y as usize].len() as f64{
-            return None
-        }
-        Some(&self.grid[p.y as usize][p.x as usize])
-    }
-
-    pub fn get_mut(&mut self, p: &Point) -> Option<&mut Cell>{
-        if p.y < 0.0 || p.y >= self.grid.len() as f64{
-            return None
-        }
-        if p.x < 0.0 || p.x >= self.grid[p.y as usize].len() as f64{
-            return None
-        }
-        Some(&mut self.grid[p.x as usize][p.y as usize])
-    }
-
-    pub fn insert_player(&mut self, player: &mut dyn Object){
-        for (i,_) in &player.get_body().grid{
-            let cell = self.get_mut(i);
-            if cell.is_some(){
-                *cell.unwrap() = SPACE_CELL.clone();
-            }
-        }
-        let occupied_space = player.draw();
-        for (i, mat) in &occupied_space{
-            let cell = self.get_mut(i);
-            if cell.is_some(){
-                *cell.unwrap() = Cell{color: mat.color.clone(), occupied: true};
-            }
-        }
-        player.get_body_mut().grid = occupied_space;
-    }
-
-
 }
 
 pub struct Space{
-    size: Point,
-    grid: CellGrid,
     cor: f64,
     pub players: Vec<ObjectCell>,
-    pub canvas: Vec<u8>,
+    pub canvas: Canvas,
     pub rx: Receiver<msg>
 }
 
 impl Space{
     pub fn new(player1: Player, player2: Player, cor: f64, rx: Receiver<msg>) -> Space{
-        let (width, height): (f64, f64) = (100.0, 100.0);
-        let canvas: Vec<u8> = vec![0;width as usize * height as usize *4];
-        let grid = CellGrid::new(width, height);
-        let player1: ObjectCell = Mutex::new(Box::new(player1));
-        let player2: ObjectCell = Mutex::new(Box::new(player2));
+        let canvas: Canvas = Canvas::new((1,1), (50,30), constellation::canvas::Color::new(0,0,0,true));
+        let player1: ObjectCell = Arc::new(Mutex::new(Box::new(player1)));
+        let player2: ObjectCell = Arc::new(Mutex::new(Box::new(player2)));
         let players: Vec<ObjectCell> = vec![player1, player2];
-        Space {size: Point{x:width, y:height}, grid, canvas, players, cor, rx}
+        Space {canvas, players, cor, rx}
     }
 
-    fn update_canvas(&mut self){
-        let mut red: u8;
-        let mut blue: u8;
-        let mut green: u8;
-        let mut alpha: u8;
-        for (x, row) in self.grid.grid.iter().enumerate(){
-            for (y, cell) in row.iter().enumerate(){
-                (red, green, blue, alpha) = cell.color.get_values();
-                let index: usize = ((y as i32 * self.size.x as i32 + x as i32) * 4) as usize;
-                    self.canvas[index] = red;
-                    self.canvas[index + 1] = green;
-                    self.canvas[index + 2] = blue;
-                    self.canvas[index + 3] = alpha;
-            }
+    pub fn update_canvas(&mut self){
+        for object in &mut self.players{
+            self.canvas.update(object.lock().unwrap().get_body_mut().get_map_mut());
         }
+    }
+
+    fn draw(&mut self){
+        self.canvas.draw();
     }
 
     fn get_collision_pairings(&self) -> Vec<(usize, usize)>{
         return vec![(0,1)];
-    }
-
-    pub fn push_canvas(&self) -> Vec<u8>{
-        let mut image = vec![0;self.size.x as usize * self.size.y as usize *4];
-        let mut red: u8;
-        let mut blue: u8;
-        let mut green: u8;
-        let mut alpha: u8;
-        for (x, row) in self.grid.grid.iter().enumerate(){
-            for (y, cell) in row.iter().enumerate(){
-                (red, green, blue, alpha) = cell.color.get_values();
-                let index: usize = ((y as i32 * self.size.x as i32 + x as i32) * 4) as usize;
-                    image[index] = red;
-                    image[index + 1] = green;
-                    image[index + 2] = blue;
-                    image[index + 3] = alpha;
-            }
-        }
-        return image
-    }
-
-    pub fn get_canvas(&self) -> *const u8{
-        return self.canvas.as_ptr()
     }
 
     pub fn turn(&mut self){
@@ -166,6 +82,8 @@ impl Space{
         for (x,y) in collision_pairings{
             let mut obj_1 = self.players[x].lock().unwrap();
             let mut obj_2 = self.players[y].lock().unwrap();
+            let obj_1_pos = *obj_1.get_pos();
+            let obj_2_pos = *obj_2.get_pos();
             // let obj_1: Rc<RefCell<Box<dyn Object>>> = self.players[x].clone();
             // let obj_2 = self.players[y].clone();
             let magnitude1_initial = obj_1.get_velocity().vector.magnitude;
@@ -173,24 +91,34 @@ impl Space{
             let collision_time = obj_1.collide(&mut **obj_2, self.cor);
             let t = collision_time.unwrap_or(27.);
             if t > 1. || t < 0.{
-                obj_1.get_velocity_mut().translate(&self.size);
-                obj_2.get_velocity_mut().translate(&self.size);
+                let vec1 = obj_1.get_velocity_mut();
+                vec1.translate(&self.canvas.size.into());
+                let p1 = constellation::canvas::Point{x: vec1.vector.x as i32, y: vec1.vector.y as i32};
+                let vec2 = obj_2.get_velocity_mut();
+                vec2.translate(&self.canvas.size.into());
+                let p2 = constellation::canvas::Point{x: vec2.vector.x as i32, y: vec2.vector.y as i32};
+                obj_1.get_body_mut().get_map_mut().translate(p1);
+                obj_2.get_body_mut().get_map_mut().translate(p2);
             }
             else{
-            let mut intermediate_point_1 = obj_1.translate_pos(t);
-            let mut intermediate_point_2 = obj_2.translate_pos(t);
-            //finds the distance traveled before collision
-            let pre_collision_vector1 = obj_1.get_pos().between(&intermediate_point_1);
-            let pre_collision_vector2 = obj_2.get_pos().between(&intermediate_point_2);
-            //finds the distance that still needs to be traveled
-            let magnitude1 = magnitude1_initial - pre_collision_vector1.magnitude;
-            let magnitude2 = magnitude2_initial - pre_collision_vector2.magnitude;
-            //travels the remaining distance
-            pre_collision_vector1.translate_magnitude(&mut intermediate_point_1, magnitude1);
-            pre_collision_vector2.translate_magnitude(&mut intermediate_point_2, magnitude2);
+                let mut intermediate_point_1 = obj_1.translate_pos(t);
+                let mut intermediate_point_2 = obj_2.translate_pos(t);
+                //finds the distance traveled before collision
+                let pre_collision_vector1 = obj_1.get_pos().between(&intermediate_point_1);
+                let pre_collision_vector2 = obj_2.get_pos().between(&intermediate_point_2);
+                //finds the distance that still needs to be traveled
+                let magnitude1 = magnitude1_initial - pre_collision_vector1.magnitude;
+                let magnitude2 = magnitude2_initial - pre_collision_vector2.magnitude;
+                //travels the remaining distance
+                pre_collision_vector1.translate_magnitude(&mut intermediate_point_1, magnitude1);
+                pre_collision_vector2.translate_magnitude(&mut intermediate_point_2, magnitude2);
+                obj_1.get_velocity_mut().translate_origin(&pre_collision_vector1);
+                obj_2.get_velocity_mut().translate_origin(&pre_collision_vector2);
+                let translation_1: constellation::canvas::Point = obj_1_pos.between(&obj_1.get_pos()).into();
+                let translation_2: constellation::canvas::Point = obj_2_pos.between(&obj_2.get_pos()).into();
+                obj_1.get_body_mut().get_map_mut().translate(translation_1);
+                obj_2.get_body_mut().get_map_mut().translate(translation_2);
             }
-            self.grid.insert_player(&mut **obj_1);
-            self.grid.insert_player(&mut **obj_2);
         }
 
     }
@@ -198,6 +126,7 @@ impl Space{
     pub fn tick(&mut self){
         self.turn();
         self.update_canvas();
+        self.draw();
     }
 
     // pub fn accelerate(&mut self, id: i32, x: f64, y: f64){

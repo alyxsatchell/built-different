@@ -12,7 +12,7 @@ mod tests {
     use crate::object::Object;
     use crate::player::Player;
     use crate::vector::{Point, Vector};
-    use crate::{physics};
+    use crate::physics;
     use crate::universe::{Universe, parse_input, get_input};
 
     #[test]
@@ -125,7 +125,15 @@ mod tests {
     #[test]
     fn universe_run(){
         let mut uni = Universe::new();
-        uni.run();
+        for _ in 0..4{
+            uni.run();
+        }
+    }
+
+    #[test]
+    fn test_show(){
+        let mut universe = Universe::new();
+        universe.run();
     }
     // #[test]
     // fn test_run(){
