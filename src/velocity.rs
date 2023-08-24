@@ -1,6 +1,6 @@
 use rand::prelude::*;
 use std::ops::{Index, IndexMut, Add, Sub, AddAssign};
-use std::fmt;
+use std::{fmt, vec};
 
 use crate::vector::{Vector, Point};
 
@@ -24,6 +24,11 @@ impl Velocity{
 
     pub fn zero() -> Velocity{
         return Velocity{origin: Point{x:0.0, y:0.0}, vector: Vector::zero()}
+    }
+
+    pub fn translate_origin(&mut self, vector: &Vector){
+        self.origin.x += vector.x;
+        self.origin.y += vector.y;
     }
 
     pub fn translate(&mut self, map_size: &Point){

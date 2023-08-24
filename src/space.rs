@@ -3,6 +3,7 @@ use std::sync::{Mutex, Arc};
 use std::sync::mpsc::Receiver;
 
 use constellation::canvas::Canvas;
+use constellation::debug_logger::debug_log;
 use constellation::stencil::Stencil;
 
 use crate::player::Player;
@@ -111,6 +112,8 @@ impl Space{
                 //travels the remaining distance
                 pre_collision_vector1.translate_magnitude(&mut intermediate_point_1, magnitude1);
                 pre_collision_vector2.translate_magnitude(&mut intermediate_point_2, magnitude2);
+                obj_1.get_velocity_mut().translate_origin(&pre_collision_vector1);
+                obj_2.get_velocity_mut().translate_origin(&pre_collision_vector2);
                 let translation_1: constellation::canvas::Point = obj_1_pos.between(&obj_1.get_pos()).into();
                 let translation_2: constellation::canvas::Point = obj_2_pos.between(&obj_2.get_pos()).into();
                 obj_1.get_body_mut().get_map_mut().translate(translation_1);

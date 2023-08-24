@@ -3,7 +3,7 @@ use std::ops::{Index, IndexMut, Add, Sub, AddAssign, Mul, MulAssign};
 use std::cmp::{PartialEq,Eq};
 use std::fmt;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Point{
     pub x: f64,
     pub y: f64
